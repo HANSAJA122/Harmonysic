@@ -1,0 +1,46 @@
+:root {
+  --color-primary: #1DB954;
+  --color-primary-hover: #1ed760;
+  --color-secondary: #121212;
+  --color-background: #000000; /* Pure black for modern OLED friendly background */
+  --color-surface: #121212;
+  --color-surface-elevated: #282828;
+  --color-surface-hover: #3E3E3E;
+  --color-surface-light: #535353;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #B3B3B3;
+  --color-accent: #3BE477;
+  --color-danger: #e91429;
+  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.5rem;
+  --spacing-6: 2rem;
+  --spacing-8: 3rem;
+  --spacing-10: 4rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  --z-bottom-nav: 100;
+  --z-player: 90;
+  --z-header: 80;
+  --z-modal: 1000;
+  
+  --player-height-desktop: 90px;
+  --player-height-mobile: 60px;
+  --mobile-nav-height: 65px;
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 80px;
+}

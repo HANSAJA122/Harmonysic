@@ -1,0 +1,56 @@
+.library-page {
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-8) var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .library-page {
+    padding: var(--spacing-6) var(--spacing-6) var(--spacing-10) var(--spacing-6);
+  }
+}
+
+.library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+}
+
+.library-tabs {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-6);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.library-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.library-tab.active {
+  background-color: var(--color-text-primary);
+  color: var(--color-background);
+}
+
+.library-tab:hover:not(.active) {
+  background-color: var(--color-surface-hover);
+}
+
+.library-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .library-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
