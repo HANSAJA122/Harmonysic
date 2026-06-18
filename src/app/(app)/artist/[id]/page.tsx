@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Play, CheckCircle2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
-import TrackList from '@/components/Playlist/TrackList';
+import { SongCard } from '@/components/UI/SongCard';
 import { MediaCard } from '@/components/UI/MediaCard';
 import './Artist.css';
 
@@ -103,7 +103,16 @@ export default function ArtistPage() {
       <div className="artist-content">
         <section className="artist-top-songs">
           <h2 className="artist-section-title">Popular</h2>
-          <TrackList tracks={data.topSongs} onTrackSelect={(index) => setQueue(data.topSongs, index)} />
+          <div style={{ display: 'grid', gap: '8px' }}>
+            {data.topSongs.map((track, index) => (
+              <SongCard 
+                key={track.id} 
+                track={track} 
+                index={index}
+                onClick={() => setQueue(data.topSongs, index)}
+              />
+            ))}
+          </div>
         </section>
 
         {data.albums && data.albums.length > 0 && (
