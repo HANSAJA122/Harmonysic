@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
     // Process top albums/singles into our MediaCard format
     const albums = (artistData.topAlbums || []).map((item: any) => ({
-      id: item.browseId || item.playlistId,
+      id: item.albumId || item.playlistId,
       title: item.name,
       description: item.year || 'Album',
       imageUrl: item.thumbnails && item.thumbnails.length > 0 
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     }));
     
     const singles = (artistData.topSingles || []).map((item: any) => ({
-      id: item.browseId || item.playlistId,
+      id: item.albumId || item.playlistId,
       title: item.name,
       description: item.year || 'Single',
       imageUrl: item.thumbnails && item.thumbnails.length > 0 
@@ -50,7 +50,12 @@ export async function GET(request: Request) {
       type: 'album'
     }));
 
-    const related = (artistData.featuredOn || []).map((item: any) => ({
+    const related = (artistData.featuredOn || [])
+      .filter((item: any) => {
+        const id = item.playlistId || item.browseId || '';
+        return id.startsWith('PL') || id.startsWith('RD');
+      })
+      .map((item: any) => ({
       id: item.playlistId || item.browseId,
       title: item.name,
       description: 'Playlist',
