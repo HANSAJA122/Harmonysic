@@ -101,6 +101,25 @@
   margin-bottom: 48px;
 }
 
+.horizontal-scroll-container {
+  display: flex;
+  gap: var(--spacing-4);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-4);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-item {
+  min-width: 160px;
+  max-width: 200px;
+  flex: 0 0 auto;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .artist-header {
