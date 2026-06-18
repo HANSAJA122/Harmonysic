@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { useAuthStore } from './authStore';
 
 export interface Track {
   id: string;
@@ -21,6 +23,7 @@ interface PlayerState {
   isRepeat: boolean;
   likedSongs: Track[];
   savedPlaylists: any[];
+  guestPlayCount: number;
   youtubePlayer: any;
   setYoutubePlayer: (player: any) => void;
   setCurrentTrack: (track: Track) => void;
@@ -41,7 +44,9 @@ interface PlayerState {
   toggleSavePlaylist: (playlist: any) => void;
 }
 
-export const usePlayerStore = create<PlayerState>((set, get) => ({
+export const usePlayerStore = create<PlayerState>()(
+  persist(
+    (set, get) => ({
   currentTrack: null,
   isPlaying: false,
   isFullScreen: false,
@@ -54,6 +59,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isRepeat: false,
   likedSongs: [],
   savedPlaylists: [],
+  guestPlayCount: 0,
   youtubePlayer: null,
   setYoutubePlayer: (player) => set({ youtubePlayer: player }),
   
@@ -71,12 +77,22 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   
   setQueue: (tracks, startIndex = 0) => {
     if (tracks.length === 0) return;
+    
+    const { user, openLoginModal } = useAuthStore.getState();
+    const currentPlayCount = get().guestPlayCount;
+
+    if (!user && currentPlayCount >= 3) {
+      openLoginModal();
+      return; // Block playback
+    }
+
     set({
       queue: tracks,
       currentIndex: startIndex,
       currentTrack: tracks[startIndex],
       isPlaying: true,
-      progress: 0
+      progress: 0,
+      guestPlayCount: !user ? currentPlayCount + 1 : currentPlayCount
     });
   },
 
@@ -93,11 +109,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       return { isPlaying: false, progress: 0 }; // End of queue
     }
     
+    const { user, openLoginModal } = useAuthStore.getState();
+    if (!user && state.guestPlayCount >= 3) {
+      openLoginModal();
+      return { isPlaying: false }; // Pause playback and block
+    }
+
     return {
       currentIndex: nextIndex,
       currentTrack: state.queue[nextIndex],
       isPlaying: true,
-      progress: 0
+      progress: 0,
+      guestPlayCount: !user ? state.guestPlayCount + 1 : state.guestPlayCount
     };
   }),
 
@@ -105,31 +128,67 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (state.queue.length === 0 || state.currentIndex <= 0) {
       return { progress: 0 }; // Restart current song if at beginning
     }
+    
+    const { user, openLoginModal } = useAuthStore.getState();
+    if (!user && state.guestPlayCount >= 3) {
+      openLoginModal();
+      return { isPlaying: false }; // Pause playback and block
+    }
+
     const prevIndex = state.currentIndex - 1;
     return {
       currentIndex: prevIndex,
       currentTrack: state.queue[prevIndex],
       isPlaying: true,
-      progress: 0
+      progress: 0,
+      guestPlayCount: !user ? state.guestPlayCount + 1 : state.guestPlayCount
     };
   }),
 
   toggleShuffle: () => set((state) => ({ isShuffle: !state.isShuffle })),
   toggleRepeat: () => set((state) => ({ isRepeat: !state.isRepeat })),
   
-  toggleLikeSong: (track) => set((state) => {
-    const isLiked = state.likedSongs.some(s => s.id === track.id);
-    if (isLiked) {
-      return { likedSongs: state.likedSongs.filter(s => s.id !== track.id) };
+  toggleLikeSong: (track) => {
+    const { user, openLoginModal } = useAuthStore.getState();
+    if (!user) {
+      openLoginModal();
+      return;
     }
-    return { likedSongs: [...state.likedSongs, track] };
-  }),
+
+    set((state) => {
+      const isLiked = state.likedSongs.some(s => s.id === track.id);
+      if (isLiked) {
+        return { likedSongs: state.likedSongs.filter(s => s.id !== track.id) };
+      }
+      return { likedSongs: [...state.likedSongs, track] };
+    });
+  },
   
-  toggleSavePlaylist: (playlist) => set((state) => {
-    const isSaved = state.savedPlaylists.some(p => p.id === playlist.id);
-    if (isSaved) {
-      return { savedPlaylists: state.savedPlaylists.filter(p => p.id !== playlist.id) };
+  toggleSavePlaylist: (playlist) => {
+    const { user, openLoginModal } = useAuthStore.getState();
+    if (!user) {
+      openLoginModal();
+      return;
     }
-    return { savedPlaylists: [...state.savedPlaylists, playlist] };
+
+    set((state) => {
+      const isSaved = state.savedPlaylists.some(p => p.id === playlist.id);
+      if (isSaved) {
+        return { savedPlaylists: state.savedPlaylists.filter(p => p.id !== playlist.id) };
+      }
+      return { savedPlaylists: [...state.savedPlaylists, playlist] };
+    });
+  },
+}),
+{
+  name: 'harmonysic-storage',
+  partialize: (state) => ({ 
+    likedSongs: state.likedSongs,
+    savedPlaylists: state.savedPlaylists,
+    volume: state.volume,
+    isShuffle: state.isShuffle,
+    isRepeat: state.isRepeat,
+    guestPlayCount: state.guestPlayCount
   }),
-}));
+}
+));

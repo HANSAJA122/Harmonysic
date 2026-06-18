@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Search, Bell, Download, User } from 'lucide-react';
+import { Home, Search, Bell, Download, User, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { auth } from '@/lib/firebase';
 import './Topbar.css';
 
 const Topbar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, openLoginModal } = useAuthStore();
   const [searchInput, setSearchInput] = useState('');
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -61,9 +64,33 @@ const Topbar: React.FC = () => {
         <button className="topbar-icon-btn">
           <Bell size={20} />
         </button>
-        <button className="topbar-profile-btn">
-          <User size={20} />
-        </button>
+        
+        {user ? (
+          <div className="topbar-user-menu">
+            <button 
+              className="topbar-profile-btn" 
+              style={{ padding: 0, overflow: 'hidden' }}
+              title={user.displayName || 'User Profile'}
+            >
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <User size={20} />
+              )}
+            </button>
+            <button 
+              className="topbar-icon-btn logout-btn" 
+              onClick={() => auth.signOut()}
+              title="Log out"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        ) : (
+          <button className="topbar-login-btn" onClick={openLoginModal}>
+            Log in
+          </button>
+        )}
       </div>
     </header>
   );

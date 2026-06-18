@@ -2,13 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { likedSongs, savedPlaylists, setQueue } = usePlayerStore();
 
   const handlePlayLikedSongs = () => {
@@ -55,7 +56,11 @@ const Sidebar: React.FC = () => {
         </div>
 
         {savedPlaylists.map((playlist) => (
-          <div key={playlist.id} className="library-item">
+          <div 
+            key={playlist.id} 
+            className="library-item"
+            onClick={() => router.push(`/playlist/${playlist.id}`)}
+          >
             <img src={playlist.imageUrl} className="library-item-img" alt={playlist.title} />
             <div className="library-item-info">
               <div className="library-item-title">{playlist.title}</div>

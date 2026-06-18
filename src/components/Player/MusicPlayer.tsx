@@ -149,6 +149,10 @@ const MusicPlayer: React.FC = () => {
     console.error('[YouTube API] onError fired with code:', event.data);
     console.log('Error codes: 150/101 = Copyright Block. 2 = Invalid ID.');
     setIsPlaying(false);
+    
+    // Automatically skip to the next track if this one fails to play
+    console.log('Skipping to next track due to playback error...');
+    playNext();
   };
 
   // We still keep the useEffect to sync from external changes, but we shouldn't rely solely on it for clicks

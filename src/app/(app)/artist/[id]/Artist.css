@@ -1,0 +1,123 @@
+.artist-page {
+  padding-bottom: 100px;
+}
+
+.artist-header {
+  position: relative;
+  height: 340px;
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+  background-size: cover;
+  background-position: center;
+  margin-top: -64px; /* Pull up under topbar */
+}
+
+.artist-header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(transparent 0, rgba(0, 0, 0, 0.8) 100%);
+  z-index: 1;
+}
+
+.artist-info {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #fff;
+}
+
+.artist-type {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verified-badge {
+  color: #3d91f4;
+}
+
+.artist-title {
+  font-size: 6rem;
+  font-weight: 900;
+  line-height: 1;
+  margin: 0 0 16px;
+  letter-spacing: -0.04em;
+  padding: 0.08em 0;
+}
+
+.artist-actions-row {
+  display: flex;
+  align-items: center;
+  padding: 24px 40px;
+  background: linear-gradient(rgba(0,0,0,.6) 0, var(--color-background-base) 100%);
+}
+
+.artist-play-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  margin-right: 32px;
+  transition: all 0.2s ease;
+}
+
+.artist-play-btn:hover {
+  transform: scale(1.04);
+  background-color: var(--color-primary-hover);
+}
+
+.artist-content {
+  padding: 0 40px;
+}
+
+.artist-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--color-text-primary);
+}
+
+.artist-top-songs {
+  margin-bottom: 48px;
+}
+
+.artist-albums {
+  margin-bottom: 48px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .artist-header {
+    height: 280px;
+    padding: 24px;
+    padding-bottom: 24px;
+  }
+  
+  .artist-title {
+    font-size: 3rem;
+  }
+  
+  .artist-actions-row {
+    padding: 16px 24px;
+  }
+  
+  .artist-content {
+    padding: 0 16px;
+  }
+}

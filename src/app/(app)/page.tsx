@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell, Clock, Settings } from 'lucide-react';
 import { MediaCard } from '@/components/UI/MediaCard';
 import { SongCard } from '@/components/UI/SongCard';
@@ -9,6 +10,7 @@ import { QuickPickCard } from '@/components/UI/QuickPickCard';
 import './Home.css';
 
 const Home: React.FC = () => {
+  const router = useRouter();
   const { setQueue } = usePlayerStore();
   const [trendingTracks, setTrendingTracks] = useState<Track[]>([]);
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -51,23 +53,14 @@ const Home: React.FC = () => {
               key={playlist.id}
               title={playlist.title}
               imageUrl={playlist.imageUrl}
-              onClick={() => setQueue(trendingTracks, index % trendingTracks.length)}
-            />
-          ))}
-          {/* Fill remaining with some mock data if API didn't return 8 */}
-          {quickPicks.length < 8 && Array.from({ length: 8 - quickPicks.length }).map((_, i) => (
-            <QuickPickCard 
-              key={`mock-${i}`}
-              title="Liked Songs"
-              imageUrl="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=64&h=64&fit=crop"
-              onClick={() => setQueue(trendingTracks, i % trendingTracks.length)}
+              onClick={() => router.push(`/playlist/${playlist.id}`)}
             />
           ))}
         </div>
 
         <section className="section">
           <div className="section-header">
-            <h2 className="section-title">Getting started</h2>
+            <h2 className="section-title">Trending Music Globally</h2>
             <button className="section-more">Show all</button>
           </div>
           
@@ -77,7 +70,15 @@ const Home: React.FC = () => {
             <div className="horizontal-scroll">
               {trendingTracks.slice(0, 6).map((track, index) => (
                 <div key={track.id} className="scroll-item" onClick={() => setQueue(trendingTracks, index)}>
-                  <MediaCard item={track} />
+                  <MediaCard 
+                    item={{
+                      id: track.id,
+                      title: track.title,
+                      subtitle: track.artist,
+                      imageUrl: track.albumUrl,
+                      type: 'album'
+                    }} 
+                  />
                 </div>
               ))}
             </div>
@@ -94,7 +95,7 @@ const Home: React.FC = () => {
               <div key={playlist.id} className="scroll-item">
                 <MediaCard 
                   item={playlist} 
-                  onClick={() => setQueue(trendingTracks, index % trendingTracks.length)} 
+                  onClick={() => router.push(`/playlist/${playlist.id}`)} 
                 />
               </div>
             ))}
@@ -111,7 +112,7 @@ const Home: React.FC = () => {
               <div key={artist.id} className="scroll-item">
                 <MediaCard 
                   item={{...artist, type: 'artist'}} 
-                  onClick={() => setQueue(trendingTracks, index % trendingTracks.length)} 
+                  onClick={() => router.push(`/artist/${artist.id}`)} 
                 />
               </div>
             ))}

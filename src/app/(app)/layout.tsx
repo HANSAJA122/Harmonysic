@@ -4,6 +4,7 @@ import RightSidebar from '@/components/Layout/RightSidebar';
 import BottomNav from '@/components/Layout/BottomNav';
 import MusicPlayer from '@/components/Player/MusicPlayer';
 import FullScreenPlayer from '@/components/Player/FullScreenPlayer';
+import { AuthProvider } from '@/components/Auth/AuthProvider';
 import '@/components/Layout/AppLayout.css';
 
 export default function AppLayout({
@@ -13,32 +14,34 @@ export default function AppLayout({
 }) {
   return (
     <div className="app-layout">
-      {/* Global Topbar */}
-      <Topbar />
+      <AuthProvider>
+        {/* Global Topbar */}
+        <Topbar />
 
-      <div className="app-main-wrapper">
-        {/* Desktop Left Sidebar */}
-        <Sidebar />
+        <div className="app-main-wrapper">
+          {/* Desktop Left Sidebar */}
+          <Sidebar />
 
-        {/* Center Main Content Area */}
-        <main className="app-main">
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {children}
-          </div>
-        </main>
+          {/* Center Main Content Area */}
+          <main className="app-main">
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {children}
+            </div>
+          </main>
 
-        {/* Desktop Right Sidebar */}
-        <RightSidebar />
-      </div>
+          {/* Desktop Right Sidebar */}
+          <RightSidebar />
+        </div>
 
-      {/* Persistent Music Player */}
-      <MusicPlayer />
-      
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
-      
-      {/* Full Screen Player Modal */}
-      <FullScreenPlayer />
+        {/* Persistent Music Player */}
+        <MusicPlayer />
+        
+        {/* Mobile Bottom Navigation */}
+        <BottomNav />
+        
+        {/* Full Screen Player Modal */}
+        <FullScreenPlayer />
+      </AuthProvider>
     </div>
   );
 }
