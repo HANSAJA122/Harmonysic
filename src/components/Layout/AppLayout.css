@@ -1,23 +1,41 @@
 .app-layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background-color: var(--color-background);
 }
 
+.app-main-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Scroll handled in pages */
+  overflow: hidden;
   position: relative;
-  /* Add padding bottom equal to player height to ensure content isn't hidden */
-  padding-bottom: var(--player-height-mobile);
+  background-color: var(--color-background);
 }
 
 @media (min-width: 768px) {
+  .app-main-wrapper {
+    padding: var(--layout-padding);
+    padding-bottom: 0;
+    gap: var(--layout-gap);
+    /* Leave exactly the height of the desktop player + a tiny bottom padding/gap for the grid */
+    height: calc(100vh - var(--player-height-desktop) - var(--topbar-height) - var(--layout-gap));
+  }
+
   .app-main {
-    padding-bottom: var(--player-height-desktop);
+    background-color: var(--color-surface);
+    border-radius: var(--panel-radius);
+    margin-right: 0;
+    min-width: 400px; /* Prevent it from shrinking too much when sidebars are open */
   }
 }

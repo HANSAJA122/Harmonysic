@@ -3,14 +3,15 @@
   align-items: center;
   gap: var(--spacing-4);
   padding: var(--spacing-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm); /* Spotify uses a subtle radius for rows */
   transition: background-color var(--transition-fast);
   cursor: pointer;
   position: relative;
+  background-color: transparent;
 }
 
 .song-card:hover {
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-surface-elevated);
 }
 
 .song-artwork-container {
@@ -102,17 +103,17 @@
 
 /* Media Card (Playlist/Album/Artist) */
 .media-card {
-  background-color: var(--color-surface);
+  background-color: transparent;
   padding: var(--spacing-4);
   border-radius: var(--radius-md);
-  transition: background-color var(--transition-normal);
+  transition: background-color var(--transition-fast);
   cursor: pointer;
   display: flex;
   flex-direction: column;
 }
 
 .media-card:hover {
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-surface-elevated);
 }
 
 .media-artwork-container {
@@ -148,13 +149,24 @@
   justify-content: center;
   opacity: 0;
   transform: translateY(8px);
-  transition: all var(--transition-normal);
+  transition: all 0.3s ease;
   box-shadow: 0 8px 8px rgba(0,0,0,0.3);
+  z-index: 2;
+  cursor: pointer;
 }
 
 .media-card:hover .media-play-btn {
   opacity: 1;
   transform: translateY(0);
+}
+
+.media-card:hover .media-like-btn {
+  opacity: 1 !important;
+}
+
+.media-play-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: scale(1.04) translateY(0);
 }
 
 .media-title {
@@ -171,4 +183,76 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   line-height: 1.4;
+}
+
+/* Quick Pick Card */
+.quick-pick-card {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 48px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  position: relative;
+}
+
+.quick-pick-card:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.quick-pick-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.quick-pick-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  padding: 0 16px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-pick-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  opacity: 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: all var(--transition-fast);
+  /* Removed pointer-events: none so it can be clicked */
+}
+
+.quick-pick-card:hover .quick-pick-play-btn {
+  opacity: 1;
+}
+
+@media (min-width: 1024px) {
+  .quick-pick-card {
+    height: 64px;
+  }
+  .quick-pick-img {
+    width: 64px;
+    height: 64px;
+  }
+  .quick-pick-title {
+    font-size: 1rem;
+  }
+  .quick-pick-play-btn {
+    width: 40px;
+    height: 40px;
+  }
 }

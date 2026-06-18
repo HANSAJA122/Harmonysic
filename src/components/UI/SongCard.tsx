@@ -7,15 +7,36 @@ import './Cards.css';
 interface SongCardProps {
   track: Track;
   index?: number;
+  onClick?: () => void;
 }
 
-export const SongCard: React.FC<SongCardProps> = ({ track, index }) => {
-  const { setCurrentTrack, currentTrack, isPlaying } = usePlayerStore();
+export const SongCard: React.FC<SongCardProps> = ({ track, index, onClick }) => {
+  const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying, youtubePlayer, likedSongs, toggleLikeSong } = usePlayerStore();
+
+  const isLiked = likedSongs.some(s => s.id === track.id);
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setCurrentTrack(track);
+      setIsPlaying(true);
+      if (youtubePlayer) {
+        try {
+          console.log('[Direct Click] loadVideoById & playVideo on existing player');
+          youtubePlayer.loadVideoById(track.id);
+          youtubePlayer.playVideo();
+        } catch (e) {
+          console.error('Failed direct load/play', e);
+        }
+      }
+    }
+  };
 
   const isCurrentTrack = currentTrack?.id === track.id;
 
   return (
-    <div className="song-card" onClick={() => setCurrentTrack(track)}>
+    <div className="song-card" onClick={handleClick}>
       {index !== undefined && (
         <div style={{ width: '24px', textAlign: 'center', color: isCurrentTrack ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
           {isCurrentTrack && isPlaying ? (
@@ -38,7 +59,13 @@ export const SongCard: React.FC<SongCardProps> = ({ track, index }) => {
         <div className="song-artist">{track.artist}</div>
       </div>
       <div className="song-actions" onClick={(e) => e.stopPropagation()}>
-        <button className="song-action-btn"><Heart size={20} /></button>
+        <button 
+          className="song-action-btn"
+          onClick={() => toggleLikeSong(track)}
+          style={{ color: isLiked ? 'var(--color-primary)' : 'inherit' }}
+        >
+          <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
+        </button>
         <button className="song-action-btn"><MoreHorizontal size={20} /></button>
       </div>
     </div>

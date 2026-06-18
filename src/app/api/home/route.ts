@@ -8,6 +8,7 @@ export async function GET() {
     await ytmusic.initialize();
     const results = await ytmusic.search('Global Top 50 Songs');
     
+    // Parse Tracks
     const tracks = results
       .filter((item: any) => item.type === 'SONG' && item.videoId)
       .map((item: any) => ({
@@ -20,9 +21,39 @@ export async function GET() {
           : 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=300&h=300&fit=crop',
         duration: item.duration || 180,
       }))
-      .slice(0, 10); // return top 10 for home
+      .slice(0, 10);
 
-    return NextResponse.json({ tracks });
+    // Fetch Playlists
+    const playlistResults = await ytmusic.search('Popular Playlists');
+    const playlists = playlistResults
+      .filter((item: any) => item.type === 'PLAYLIST')
+      .map((item: any) => ({
+        id: item.playlistId,
+        title: item.name,
+        description: item.author || 'YouTube Music',
+        imageUrl: item.thumbnails && item.thumbnails.length > 0 
+          ? item.thumbnails[item.thumbnails.length - 1].url 
+          : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop',
+        type: 'playlist'
+      }))
+      .slice(0, 6);
+
+    // Fetch Artists
+    const artistResults = await ytmusic.search('Trending Artists');
+    const artists = artistResults
+      .filter((item: any) => item.type === 'ARTIST')
+      .map((item: any) => ({
+        id: item.artistId,
+        title: item.name,
+        description: 'Artist',
+        imageUrl: item.thumbnails && item.thumbnails.length > 0 
+          ? item.thumbnails[item.thumbnails.length - 1].url 
+          : 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5f92e?w=300&h=300&fit=crop',
+        type: 'artist'
+      }))
+      .slice(0, 6);
+
+    return NextResponse.json({ tracks, playlists, artists });
   } catch (error) {
     console.error('Home error:', error);
     return NextResponse.json({ error: 'Failed to fetch home results' }, { status: 500 });

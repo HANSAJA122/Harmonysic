@@ -1,4 +1,6 @@
+import Topbar from '@/components/Layout/Topbar';
 import Sidebar from '@/components/Layout/Sidebar';
+import RightSidebar from '@/components/Layout/RightSidebar';
 import BottomNav from '@/components/Layout/BottomNav';
 import MusicPlayer from '@/components/Player/MusicPlayer';
 import FullScreenPlayer from '@/components/Player/FullScreenPlayer';
@@ -11,15 +13,23 @@ export default function AppLayout({
 }) {
   return (
     <div className="app-layout">
-      {/* Desktop Sidebar */}
-      <Sidebar />
+      {/* Global Topbar */}
+      <Topbar />
 
-      {/* Main Content Area */}
-      <main className="app-main">
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {children}
-        </div>
-      </main>
+      <div className="app-main-wrapper">
+        {/* Desktop Left Sidebar */}
+        <Sidebar />
+
+        {/* Center Main Content Area */}
+        <main className="app-main">
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {children}
+          </div>
+        </main>
+
+        {/* Desktop Right Sidebar */}
+        <RightSidebar />
+      </div>
 
       {/* Persistent Music Player */}
       <MusicPlayer />

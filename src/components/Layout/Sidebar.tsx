@@ -4,62 +4,65 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
+import { usePlayerStore } from '@/store/playerStore';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const { likedSongs, savedPlaylists, setQueue } = usePlayerStore();
+
+  const handlePlayLikedSongs = () => {
+    if (likedSongs.length > 0) {
+      setQueue(likedSongs, 0);
+    }
+  };
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <div style={{ color: 'var(--color-primary)' }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18V5l12-2v13"></path>
-            <circle cx="6" cy="18" r="3"></circle>
-            <circle cx="18" cy="16" r="3"></circle>
-          </svg>
-        </div>
-        Harmony
-      </div>
-
       <nav className="sidebar-nav">
-        <Link href="/" className={`sidebar-nav-item ${pathname === '/' ? 'active' : ''}`}>
-          <Home size={24} />
-          <span>Home</span>
-        </Link>
-        <Link href="/search" className={`sidebar-nav-item ${pathname === '/search' ? 'active' : ''}`}>
-          <Search size={24} />
-          <span>Search</span>
-        </Link>
-        <Link href="/library" className={`sidebar-nav-item ${pathname === '/library' ? 'active' : ''}`}>
+        <Link href="/library" className={`sidebar-nav-item ${pathname === '/library' ? 'active' : ''}`} style={{ padding: '0 8px', gap: '16px' }}>
           <Library size={24} />
           <span>Your Library</span>
         </Link>
+        <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
+          <button className="icon-btn"><PlusSquare size={16} /></button>
+        </div>
       </nav>
 
-      <div className="sidebar-nav" style={{ marginTop: 'var(--spacing-4)' }}>
-        <button className="sidebar-nav-item" style={{ width: '100%' }}>
-          <div className="flex-center" style={{ background: '#b3b3b3', color: '#000', width: 24, height: 24, borderRadius: 2 }}>
-            <PlusSquare size={16} />
-          </div>
-          <span>Create Playlist</span>
-        </button>
-        <button className="sidebar-nav-item" style={{ width: '100%' }}>
-          <div className="flex-center" style={{ background: 'linear-gradient(135deg, #450af5, #c4efd9)', color: '#fff', width: 24, height: 24, borderRadius: 2 }}>
-            <Heart size={14} fill="currentColor" />
-          </div>
-          <span>Liked Songs</span>
-        </button>
+      <div className="sidebar-filters">
+        <button className="filter-pill">Playlists</button>
+        <button className="filter-pill">Artists</button>
+        <button className="filter-pill">Albums</button>
+      </div>
+
+      <div className="sidebar-search-row">
+        <button className="icon-btn" style={{ padding: 4 }}><Search size={16} /></button>
+        <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+          Recents <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M15 14.5H1V13h14v1.5zm0-5.75H1v-1.5h14v1.5zM15 3H1V1.5h14V3z"></path></svg>
+        </span>
       </div>
       
-      <div className="sidebar-divider"></div>
-      
-      {/* Mock Playlists */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-        <p className="hover-scale interactive-opacity" style={{ cursor: 'pointer' }}>Chill Vibes</p>
-        <p className="hover-scale interactive-opacity" style={{ cursor: 'pointer' }}>Top Hits 2024</p>
-        <p className="hover-scale interactive-opacity" style={{ cursor: 'pointer' }}>Focus Flow</p>
-        <p className="hover-scale interactive-opacity" style={{ cursor: 'pointer' }}>Gym Power</p>
+      {/* Real Library Data */}
+      <div className="sidebar-library-list">
+        <div className="library-item" onClick={handlePlayLikedSongs}>
+          <div className="library-item-icon liked-songs-icon">
+            <Heart size={16} fill="currentColor" />
+          </div>
+          <div className="library-item-info">
+            <div className="library-item-title">Liked Songs</div>
+            <div className="library-item-subtitle"><span style={{ color: 'var(--color-primary)' }}>★ Playlist</span> • {likedSongs.length} songs</div>
+          </div>
+        </div>
+
+        {savedPlaylists.map((playlist) => (
+          <div key={playlist.id} className="library-item">
+            <img src={playlist.imageUrl} className="library-item-img" alt={playlist.title} />
+            <div className="library-item-info">
+              <div className="library-item-title">{playlist.title}</div>
+              <div className="library-item-subtitle">Playlist • {playlist.subtitle || 'Saved'}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </aside>
   );

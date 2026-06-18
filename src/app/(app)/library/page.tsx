@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
-import { mockPlaylists, mockArtists } from '@/data/mockData';
 import { MediaCard } from '@/components/UI/MediaCard';
 import './Library.css';
 
 const Library: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Playlists');
   const tabs = ['Playlists', 'Artists', 'Albums', 'Downloaded'];
+  
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.playlists) setPlaylists(data.playlists);
+        if (data.artists) setArtists(data.artists);
+      })
+      .catch(err => console.error('Failed to load library data', err));
+  }, []);
 
   return (
     <div className="library-page animate-fade-in">
@@ -47,10 +59,10 @@ const Library: React.FC = () => {
                 <p className="text-sm">248 songs</p>
               </div>
             </div>
-            {mockPlaylists.map(p => <MediaCard key={p.id} item={p} />)}
+            {playlists.map(p => <MediaCard key={p.id} item={p} />)}
           </>
         )}
-        {activeTab === 'Artists' && mockArtists.map(a => <MediaCard key={a.id} item={a} />)}
+        {activeTab === 'Artists' && artists.map(a => <MediaCard key={a.id} item={a} />)}
         {activeTab === 'Albums' && <div className="text-secondary" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>No albums saved yet.</div>}
         {activeTab === 'Downloaded' && <div className="text-secondary" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>No downloaded content.</div>}
       </div>

@@ -5,9 +5,12 @@ import { usePlayerStore } from '@/store/playerStore';
 import './FullScreenPlayer.css';
 
 const FullScreenPlayer: React.FC = () => {
-  const { currentTrack, isPlaying, togglePlayPause, setFullScreen, progress } = usePlayerStore();
+  const { 
+    currentTrack, isPlaying, togglePlayPause, setFullScreen, progress, isFullScreen,
+    playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat 
+  } = usePlayerStore();
 
-  if (!currentTrack) return null;
+  if (!currentTrack || !isFullScreen) return null;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -54,13 +57,21 @@ const FullScreenPlayer: React.FC = () => {
       </div>
 
       <div className="fs-controls">
-        <button className="player-control-btn"><Shuffle size={24} /></button>
-        <button className="player-control-btn"><SkipBack size={36} fill="currentColor" /></button>
+        <button className="player-control-btn" onClick={toggleShuffle} style={{ color: isShuffle ? 'var(--color-primary)' : 'inherit' }}>
+          <Shuffle size={24} />
+        </button>
+        <button className="player-control-btn" onClick={playPrevious}>
+          <SkipBack size={36} fill="currentColor" />
+        </button>
         <button className="fs-play-btn" onClick={togglePlayPause}>
           {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" style={{ marginLeft: '4px' }} />}
         </button>
-        <button className="player-control-btn"><SkipForward size={36} fill="currentColor" /></button>
-        <button className="player-control-btn"><Repeat size={24} /></button>
+        <button className="player-control-btn" onClick={playNext}>
+          <SkipForward size={36} fill="currentColor" />
+        </button>
+        <button className="player-control-btn" onClick={toggleRepeat} style={{ color: isRepeat ? 'var(--color-primary)' : 'inherit' }}>
+          <Repeat size={24} />
+        </button>
       </div>
 
       <div className="fs-bottom-actions">
