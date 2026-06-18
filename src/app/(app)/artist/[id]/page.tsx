@@ -16,6 +16,7 @@ interface ArtistData {
   };
   topSongs: any[];
   albums: any[];
+  related: any[];
 }
 
 export default function ArtistPage() {
@@ -124,6 +125,21 @@ export default function ArtistPage() {
                   <MediaCard 
                     item={album} 
                     onClick={() => router.push(`/playlist/${album.id}`)} 
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        {data.related && data.related.length > 0 && (
+          <section className="artist-albums">
+            <h2 className="artist-section-title">Featured On</h2>
+            <div className="horizontal-scroll-container">
+              {data.related.map((playlist) => (
+                <div key={playlist.id} className="scroll-item">
+                  <MediaCard 
+                    item={playlist} 
+                    onClick={() => router.push(`/playlist/${playlist.id}`)} 
                   />
                 </div>
               ))}

@@ -50,6 +50,16 @@ export async function GET(request: Request) {
       type: 'album'
     }));
 
+    const related = (artistData.featuredOn || []).map((item: any) => ({
+      id: item.playlistId || item.browseId,
+      title: item.name,
+      description: 'Playlist',
+      imageUrl: item.thumbnails && item.thumbnails.length > 0 
+        ? (item.thumbnails.length > 1 ? item.thumbnails[1].url : item.thumbnails[0].url)
+        : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop',
+      type: 'playlist'
+    }));
+
     return NextResponse.json({ 
       artist: {
         id: artistData.artistId,
@@ -59,7 +69,8 @@ export async function GET(request: Request) {
           : 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5f92e?w=300&h=300&fit=crop',
       },
       topSongs,
-      albums: [...albums, ...singles]
+      albums: [...albums, ...singles],
+      related
     });
   } catch (error) {
     console.error('Artist API error:', error);

@@ -14,11 +14,19 @@ export async function GET(request: Request) {
   try {
     await ytmusic.initialize();
     
-    // Fetch playlist metadata
-    const playlistData = await ytmusic.getPlaylist(id);
-    
-    // Fetch playlist tracks
-    const videos = await ytmusic.getPlaylistVideos(id);
+    let playlistData: any;
+    let videos: any[] = [];
+
+    if (id.startsWith('MPREb_')) {
+      // It's an album!
+      playlistData = await ytmusic.getAlbum(id);
+      videos = playlistData.songs || [];
+      playlistData.playlistId = playlistData.albumId; // normalize ID field
+    } else {
+      // It's a standard playlist
+      playlistData = await ytmusic.getPlaylist(id);
+      videos = await ytmusic.getPlaylistVideos(id);
+    }
     
     const tracks = videos
       .filter((item: any) => item.videoId)
