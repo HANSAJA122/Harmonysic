@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Play, CheckCircle2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import TrackList from '@/components/Playlist/TrackList';
-import MediaCard from '@/components/Home/MediaCard';
+import { MediaCard } from '@/components/UI/MediaCard';
 import './Artist.css';
 
 interface ArtistData {
