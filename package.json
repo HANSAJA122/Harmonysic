@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "fast-average-color": "^9.5.2",
     "firebase": "^12.15.0",
     "lucide-react": "^1.20.0",
