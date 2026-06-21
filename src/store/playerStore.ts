@@ -16,6 +16,7 @@ interface PlayerState {
   currentTrack: Track | null;
   isPlaying: boolean;
   isFullScreen: boolean;
+  isLyricsOpen: boolean;
   isRightSidebarOpen: boolean;
   volume: number;
   progress: number;
@@ -35,6 +36,7 @@ interface PlayerState {
   setIsPlaying: (isPlaying: boolean) => void;
   togglePlayPause: () => void;
   setFullScreen: (isFullScreen: boolean) => void;
+  setLyricsOpen: (isOpen: boolean) => void;
   setRightSidebarOpen: (isOpen: boolean) => void;
   setVolume: (volume: number) => void;
   setProgress: (progress: number) => void;
@@ -62,6 +64,7 @@ export const usePlayerStore = create<PlayerState>()(
   currentTrack: null,
   isPlaying: false,
   isFullScreen: false,
+  isLyricsOpen: false,
   isRightSidebarOpen: true,
   volume: 0.8,
   progress: 0,
@@ -95,6 +98,7 @@ export const usePlayerStore = create<PlayerState>()(
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   togglePlayPause: () => set((state) => ({ isPlaying: !state.isPlaying })),
   setFullScreen: (isFullScreen) => set({ isFullScreen }),
+  setLyricsOpen: (isOpen) => set({ isLyricsOpen: isOpen }),
   setRightSidebarOpen: (isOpen) => set({ isRightSidebarOpen: isOpen }),
   setVolume: (volume) => set({ volume }),
   setProgress: (progress) => set({ progress }),

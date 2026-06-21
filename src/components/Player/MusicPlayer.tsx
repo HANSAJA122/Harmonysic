@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2 } from 'lucide-react';
-import LyricsModal from './LyricsModal';
+import { LyricsView } from './LyricsView';
 import { usePlayerStore } from '@/store/playerStore';
 import { FastAverageColor } from 'fast-average-color';
 import './MusicPlayer.css';
@@ -14,7 +14,8 @@ const MusicPlayer: React.FC = () => {
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
     setCurrentTrackDuration, setYoutubePlayer,
     isRightSidebarOpen, setRightSidebarOpen,
-    likedSongs, toggleLikeSong
+    likedSongs, toggleLikeSong,
+    isLyricsOpen, setLyricsOpen
   } = usePlayerStore();
   
   const isCurrentTrackLiked = currentTrack ? likedSongs.some(s => s.id === currentTrack.id) : false;
@@ -22,7 +23,6 @@ const MusicPlayer: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
-  const [isLyricsOpen, setIsLyricsOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -307,7 +307,8 @@ const MusicPlayer: React.FC = () => {
           <div className="player-right" onClick={(e) => e.stopPropagation()}>
             <button 
               className="player-control-btn" 
-              onClick={() => setIsLyricsOpen(true)}
+              onClick={() => setLyricsOpen(!isLyricsOpen)}
+              style={{ color: isLyricsOpen ? 'var(--color-primary)' : 'inherit' }}
               title="Lyrics"
             >
               <Mic2 size={16} />
@@ -350,7 +351,7 @@ const MusicPlayer: React.FC = () => {
         </div>
       )}
 
-      <LyricsModal isOpen={isLyricsOpen} onClose={() => setIsLyricsOpen(false)} />
+      <LyricsView />
     </>
   );
 };
