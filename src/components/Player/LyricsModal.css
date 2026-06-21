@@ -1,0 +1,121 @@
+.lyrics-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.lyrics-modal-content {
+  background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(20, 20, 20, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 600px;
+  height: 80vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+.lyrics-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 2;
+}
+
+.lyrics-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lyrics-header {
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.lyrics-artwork {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lyrics-info h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: white;
+}
+
+.lyrics-info p {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.lyrics-text-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lyrics-text-container::-webkit-scrollbar {
+  display: none;
+}
+
+.lyrics-text {
+  font-size: 1.75rem;
+  line-height: 1.6;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .lyrics-modal-overlay {
+    padding: 0;
+  }
+  
+  .lyrics-modal-content {
+    border-radius: 0;
+    height: 100vh;
+    max-height: 100vh;
+    border: none;
+  }
+
+  .lyrics-text {
+    font-size: 1.5rem;
+  }
+}

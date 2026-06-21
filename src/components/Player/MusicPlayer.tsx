@@ -1,8 +1,10 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2 } from 'lucide-react';
+import LyricsModal from './LyricsModal';
 import { usePlayerStore } from '@/store/playerStore';
+import { FastAverageColor } from 'fast-average-color';
 import './MusicPlayer.css';
 
 const MusicPlayer: React.FC = () => {
@@ -20,6 +22,7 @@ const MusicPlayer: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
+  const [isLyricsOpen, setIsLyricsOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -60,17 +63,27 @@ const MusicPlayer: React.FC = () => {
       console.log('=== DEEP DIAGNOSTIC LOG ===');
       console.log('1. Selected Track Object:', currentTrack);
       console.log('2. Extracted videoId:', currentTrack.id);
-      console.log('3. Generated YouTube URL:', `https://www.youtube.com/watch?v=${currentTrack.id}`);
-      console.log('4. ReactPlayer (react-youtube) State:', { isPlaying, playerReady });
       
+      // Extract Dynamic Color
+      if (currentTrack.albumUrl) {
+        const fac = new FastAverageColor();
+        fac.getColorAsync(currentTrack.albumUrl, { crossOrigin: 'anonymous' })
+          .then(color => {
+            document.documentElement.style.setProperty('--dynamic-theme-color', color.hex);
+            // Optionally set a slightly darker version for backgrounds
+            document.documentElement.style.setProperty('--dynamic-theme-color-dark', color.hex + '40'); // 25% opacity hex
+          })
+          .catch(e => {
+            console.warn('Failed to extract color:', e);
+            document.documentElement.style.removeProperty('--dynamic-theme-color');
+            document.documentElement.style.removeProperty('--dynamic-theme-color-dark');
+          });
+      }
+
       setTimeout(() => {
         const iframe = document.querySelector('iframe');
         if (iframe) {
-          console.log('5. Found Iframe in DOM:', iframe);
-          console.log('6. Iframe src attribute:', iframe.src);
-          console.log('7. Src contains videoId?', iframe.src.includes(currentTrack.id));
-        } else {
-          console.warn('5. Iframe NOT found in DOM!');
+          console.log('5. Found Iframe in DOM');
         }
       }, 1000);
     }
@@ -88,12 +101,9 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!ytPlayerRef.current || !currentTrack || !playerReady) return;
-    const bar = e.currentTarget;
-    const rect = bar.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    const newTime = percent * currentTrack.duration;
+    const newTime = parseFloat(e.target.value);
     
     try {
       ytPlayerRef.current.seekTo(newTime, true);
@@ -101,6 +111,11 @@ const MusicPlayer: React.FC = () => {
     } catch (e) {
       console.warn('Failed to seek', e);
     }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = parseFloat(e.target.value);
+    usePlayerStore.setState({ volume: newVol });
   };
 
   const progressPercent = currentTrack && currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0;
@@ -274,8 +289,16 @@ const MusicPlayer: React.FC = () => {
             </div>
             <div className="player-progress-container">
               <span className="player-time">{formatTime(progress)}</span>
-              <div className="player-progress-bar" onClick={handleSeek} style={{ cursor: 'pointer' }}>
-                <div className="player-progress-fill" style={{ width: `${Math.min(progressPercent, 100)}%` }}></div>
+              <div className="player-progress-wrapper">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max={currentTrack.duration || 100} 
+                  value={progress} 
+                  onChange={handleSeek}
+                  className="player-progress-slider"
+                  style={{ '--progress': `${progressPercent}%` } as any}
+                />
               </div>
               <span className="player-time">{formatTime(currentTrack.duration)}</span>
             </div>
@@ -284,14 +307,31 @@ const MusicPlayer: React.FC = () => {
           <div className="player-right" onClick={(e) => e.stopPropagation()}>
             <button 
               className="player-control-btn" 
+              onClick={() => setIsLyricsOpen(true)}
+              title="Lyrics"
+            >
+              <Mic2 size={16} />
+            </button>
+            <button 
+              className="player-control-btn" 
               onClick={() => setRightSidebarOpen(!isRightSidebarOpen)}
               style={{ color: isRightSidebarOpen ? 'var(--color-primary)' : 'inherit' }}
+              title="Queue"
             >
               <PlaySquare size={16} />
             </button>
             <button className="player-control-btn"><Volume2 size={20} /></button>
-            <div className="volume-bar">
-              <div className="volume-fill" style={{ width: `${volume * 100}%` }}></div>
+            <div className="volume-wrapper">
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value={volume} 
+                onChange={handleVolumeChange}
+                className="volume-slider"
+                style={{ '--volume': `${volume * 100}%` } as any}
+              />
             </div>
           </div>
 
@@ -309,6 +349,8 @@ const MusicPlayer: React.FC = () => {
           </div>
         </div>
       )}
+
+      <LyricsModal isOpen={isLyricsOpen} onClose={() => setIsLyricsOpen(false)} />
     </>
   );
 };

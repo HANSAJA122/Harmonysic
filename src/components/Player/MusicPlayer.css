@@ -4,6 +4,8 @@
   left: 0;
   right: 0;
   height: var(--player-height-mobile);
+  /* Fallback to dark background, but use dynamic color if available */
+  background: linear-gradient(to top, var(--color-background) 60%, var(--dynamic-theme-color-dark, var(--color-background)));
   background-color: var(--color-background);
   display: flex;
   align-items: center;
@@ -11,16 +13,18 @@
   padding: 0 var(--spacing-4);
   z-index: var(--z-player);
   cursor: pointer;
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-normal), background 1s ease;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @media (min-width: 768px) {
   .music-player {
     bottom: 0;
     height: var(--player-height-desktop);
-    background-color: var(--color-background);
     cursor: default;
-    /* Removed the border top because Spotify uses floating panels instead */
+    border-top: none;
+    /* On desktop, maybe just a subtle top glow via box-shadow or border */
+    box-shadow: 0 -10px 40px -10px var(--dynamic-theme-color-dark, transparent);
   }
 }
 
@@ -122,44 +126,93 @@
   text-align: center;
 }
 
-.player-progress-bar {
+.player-progress-wrapper {
   flex: 1;
+  display: flex;
+  align-items: center;
+  height: 12px;
+}
+
+.player-progress-slider, .volume-slider {
+  -webkit-appearance: none;
+  width: 100%;
   height: 4px;
-  background-color: rgba(255,255,255,0.3);
-  border-radius: var(--radius-full);
-  position: relative;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  outline: none;
   cursor: pointer;
-}
-
-.player-progress-fill {
-  height: 100%;
-  background-color: var(--color-text-primary);
-  border-radius: var(--radius-full);
-  transition: background-color var(--transition-fast);
   position: relative;
 }
 
-/* Add the little grabber dot that appears on hover */
-.player-progress-fill::after {
+/* The filled part of the slider */
+.player-progress-slider::before {
   content: '';
   position: absolute;
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--progress);
   background-color: var(--color-text-primary);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  border-radius: 2px;
+  pointer-events: none;
 }
 
-.player-progress-bar:hover .player-progress-fill {
+.player-progress-slider:hover::before, .volume-slider:hover::before {
   background-color: var(--color-primary);
 }
 
-.player-progress-bar:hover .player-progress-fill::after {
+.volume-slider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--volume);
+  background-color: var(--color-text-primary);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Slider thumb */
+.player-progress-slider::-webkit-slider-thumb, .volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  opacity: 0; /* hide by default like spotify */
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 2;
+}
+
+.player-progress-slider:hover::-webkit-slider-thumb, .volume-slider:hover::-webkit-slider-thumb {
   opacity: 1;
+}
+
+.player-progress-slider::-moz-range-thumb, .volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  opacity: 0;
+  border: none;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.player-progress-slider:hover::-moz-range-thumb, .volume-slider:hover::-moz-range-thumb {
+  opacity: 1;
+}
+
+.volume-wrapper {
+  width: 100px;
+  display: flex;
+  align-items: center;
 }
 
 .player-right {
@@ -177,44 +230,7 @@
   }
 }
 
-.volume-bar {
-  width: 90px;
-  height: 4px;
-  background-color: rgba(255,255,255,0.3);
-  border-radius: var(--radius-full);
-  position: relative;
-  cursor: pointer;
-}
 
-.volume-fill {
-  height: 100%;
-  background-color: var(--color-text-primary);
-  border-radius: var(--radius-full);
-  width: 80%;
-  position: relative;
-}
-
-.volume-fill::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  background-color: var(--color-text-primary);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.volume-bar:hover .volume-fill {
-  background-color: var(--color-primary);
-}
-
-.volume-bar:hover .volume-fill::after {
-  opacity: 1;
-}
 
 /* Mobile specific player parts */
 .mobile-player-controls {

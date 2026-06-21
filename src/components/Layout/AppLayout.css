@@ -21,6 +21,21 @@
   overflow: hidden;
   position: relative;
   background-color: var(--color-background);
+  transition: background-color 1s ease;
+}
+
+.app-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 330px;
+  background: linear-gradient(to bottom, var(--dynamic-theme-color-dark, transparent), transparent);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 1s ease;
 }
 
 @media (min-width: 768px) {

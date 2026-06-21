@@ -11,7 +11,7 @@ import './Home.css';
 
 const Home: React.FC = () => {
   const router = useRouter();
-  const { setQueue } = usePlayerStore();
+  const { setQueue, recentlyPlayed } = usePlayerStore();
   const [trendingTracks, setTrendingTracks] = useState<Track[]>([]);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [artists, setArtists] = useState<any[]>([]);
@@ -57,6 +57,30 @@ const Home: React.FC = () => {
             />
           ))}
         </div>
+
+        {recentlyPlayed && recentlyPlayed.length > 0 && (
+          <section className="section">
+            <div className="section-header">
+              <h2 className="section-title">Recently Played</h2>
+              <button className="section-more">Show all</button>
+            </div>
+            <div className="horizontal-scroll">
+              {recentlyPlayed.map((track, index) => (
+                <div key={`${track.id}-${index}`} className="scroll-item" onClick={() => setQueue(recentlyPlayed, index)}>
+                  <MediaCard 
+                    item={{
+                      id: track.id,
+                      title: track.title,
+                      subtitle: track.artist,
+                      imageUrl: track.albumUrl,
+                      type: 'album'
+                    }} 
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="section">
           <div className="section-header">

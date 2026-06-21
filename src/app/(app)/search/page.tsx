@@ -1,105 +1,187 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search as SearchIcon, X, Play } from 'lucide-react';
+import { MediaCard } from '@/components/UI/MediaCard';
 import { SongCard } from '@/components/UI/SongCard';
 import { usePlayerStore, Track } from '@/store/playerStore';
 import './Search.css';
 
-const BROWSE_CATEGORIES = [
-  { id: '1', name: 'Podcasts', color: '#e13300' },
-  { id: '2', name: 'Made For You', color: '#1e3264' },
-  { id: '3', name: 'Charts', color: '#8d67ab' },
-  { id: '4', name: 'New Releases', color: '#e8115b' },
-  { id: '5', name: 'Discover', color: '#8c1932' },
-  { id: '6', name: 'Concerts', color: '#7358ff' },
-];
+interface SearchResults {
+  songs: Track[];
+  artists: any[];
+  albums: any[];
+  playlists: any[];
+}
 
-const SearchContent: React.FC = () => {
-  const { setQueue } = usePlayerStore();
+function SearchContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   
-  const [searchResults, setSearchResults] = useState<Track[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const { setQueue } = usePlayerStore();
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [results, setResults] = useState<SearchResults | null>(null);
+  const [loading, setLoading] = useState(false);
 
+  // Debounce the search input
   useEffect(() => {
-    const fetchSearchData = async () => {
-      if (!query.trim()) {
-        setSearchResults([]);
-        setIsSearching(false);
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Fetch search results
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!debouncedQuery.trim()) {
+        setResults(null);
         return;
       }
-
-      setIsSearching(true);
+      
+      setLoading(true);
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        if (data.tracks) {
-          setSearchResults(data.tracks);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setResults(data);
         }
       } catch (error) {
         console.error('Search failed:', error);
       } finally {
-        setIsSearching(false);
+        setLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      fetchSearchData();
-    }, 500); // 500ms debounce
+    fetchResults();
+  }, [debouncedQuery]);
 
-    return () => clearTimeout(debounceTimer);
-  }, [query]);
+
+
+  const hasResults = results && (
+    results.songs.length > 0 || 
+    results.artists.length > 0 || 
+    results.albums.length > 0 || 
+    results.playlists.length > 0
+  );
 
   return (
-    <div className="search-page animate-fade-in" style={{ paddingTop: '16px' }}>
-      {query ? (
-        <div className="search-results">
-          <h2 className="text-xl font-bold mb-4" style={{ marginBottom: '1rem' }}>Top Results for "{query}"</h2>
-          {isSearching ? (
-            <p className="text-secondary">Searching YouTube Music...</p>
-          ) : searchResults.length > 0 ? (
-            <div style={{ display: 'grid', gap: '8px' }}>
-              {searchResults.map((track, index) => (
-                <SongCard 
-                  key={track.id} 
-                  track={track} 
-                  onClick={() => setQueue(searchResults, index)}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-secondary">No results found for "{query}"</p>
-          )}
-        </div>
-      ) : (
-        <section className="browse-section">
-          <h2 className="text-xl font-bold mb-4" style={{ marginBottom: '1rem' }}>Browse all</h2>
-          <div className="browse-grid">
-            {BROWSE_CATEGORIES.map(category => (
-              <div
-                key={category.id}
-                className="category-card"
-                style={{ backgroundColor: category.color }}
-              >
-                <h3 className="category-title">{category.name}</h3>
-                <div className="category-decoration"></div>
-              </div>
-            ))}
+    <div className="search-page animate-fade-in">
+
+      <div className="search-content">
+        {!query && !loading && (
+          <div className="search-empty-state">
+            <h2 className="search-empty-title">Search Harmonysic</h2>
+            <p className="search-empty-subtitle">Find your favorite songs, artists, albums, and playlists.</p>
           </div>
-        </section>
-      )}
+        )}
+
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        )}
+
+        {!loading && query && !hasResults && results && (
+          <div className="search-empty-state">
+            <h2 className="search-empty-title">No results found for "{query}"</h2>
+            <p className="search-empty-subtitle">Please make sure your words are spelled correctly or use less or different keywords.</p>
+          </div>
+        )}
+
+        {!loading && hasResults && (
+          <div className="search-results">
+            
+            {/* Top Results Section - Mix of Songs & Artist */}
+            <div className="search-top-section">
+              {results.artists.length > 0 && (
+                <div className="search-top-artist">
+                  <h2 className="search-section-title">Top result</h2>
+                  <div 
+                    className="top-result-card" 
+                    onClick={() => router.push(`/artist/${results.artists[0].id}`)}
+                  >
+                    <img src={results.artists[0].imageUrl} alt={results.artists[0].title} className="top-result-img" />
+                    <h3 className="top-result-title">{results.artists[0].title}</h3>
+                    <div className="top-result-type">
+                      <span className="type-badge">Artist</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {results.songs.length > 0 && (
+                <div className="search-top-songs">
+                  <h2 className="search-section-title">Songs</h2>
+                  <div className="search-songs-list">
+                    {results.songs.slice(0, 4).map((song, index) => (
+                      <SongCard 
+                        key={song.id} 
+                        track={song} 
+                        index={index} 
+                        onClick={() => setQueue(results.songs, index)} 
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Artists */}
+            {results.artists.length > 1 && (
+              <section className="search-section">
+                <h2 className="search-section-title">Artists</h2>
+                <div className="horizontal-scroll">
+                  {results.artists.slice(1).map(artist => (
+                    <div key={artist.id} className="scroll-item">
+                      <MediaCard item={artist} onClick={() => router.push(`/artist/${artist.id}`)} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Albums */}
+            {results.albums.length > 0 && (
+              <section className="search-section">
+                <h2 className="search-section-title">Albums</h2>
+                <div className="horizontal-scroll">
+                  {results.albums.map(album => (
+                    <div key={album.id} className="scroll-item">
+                      <MediaCard item={album} onClick={() => router.push(`/playlist/${album.id}`)} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Playlists */}
+            {results.playlists.length > 0 && (
+              <section className="search-section">
+                <h2 className="search-section-title">Playlists</h2>
+                <div className="horizontal-scroll">
+                  {results.playlists.map(playlist => (
+                    <div key={playlist.id} className="scroll-item">
+                      <MediaCard item={playlist} onClick={() => router.push(`/playlist/${playlist.id}`)} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+            
+          </div>
+        )}
+      </div>
     </div>
   );
-};
+}
 
-const Search: React.FC = () => {
+export default function SearchPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '24px' }}>Loading...</div>}>
+    <Suspense fallback={<div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div></div>}>
       <SearchContent />
     </Suspense>
   );
-};
-
-export default Search;
+}

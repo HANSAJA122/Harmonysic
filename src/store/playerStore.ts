@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useAuthStore } from './authStore';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface Track {
   id: string;
@@ -23,6 +25,8 @@ interface PlayerState {
   isRepeat: boolean;
   likedSongs: Track[];
   savedPlaylists: any[];
+  userPlaylists: any[];
+  recentlyPlayed: Track[];
   guestPlayCount: number;
   youtubePlayer: any;
   setYoutubePlayer: (player: any) => void;
@@ -41,7 +45,16 @@ interface PlayerState {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   toggleLikeSong: (track: Track) => void;
+  toggleLikeSong: (track: Track) => void;
   toggleSavePlaylist: (playlist: any) => void;
+  setLikedSongs: (songs: Track[]) => void;
+  syncLikedSongsToFirebase: (songs: Track[]) => Promise<void>;
+  setRecentlyPlayed: (songs: Track[]) => void;
+  syncRecentlyPlayedToFirebase: (songs: Track[]) => Promise<void>;
+  setUserPlaylists: (playlists: any[]) => void;
+  createPlaylist: (name: string) => Promise<void>;
+  addSongToPlaylist: (playlistId: string, track: Track) => Promise<void>;
+  removeSongFromPlaylist: (playlistId: string, trackId: string) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -59,11 +72,24 @@ export const usePlayerStore = create<PlayerState>()(
   isRepeat: false,
   likedSongs: [],
   savedPlaylists: [],
+  userPlaylists: [],
+  recentlyPlayed: [],
   guestPlayCount: 0,
   youtubePlayer: null,
   setYoutubePlayer: (player) => set({ youtubePlayer: player }),
   
-  setCurrentTrack: (track) => set({ currentTrack: track, progress: 0, isRightSidebarOpen: true }),
+  setCurrentTrack: (track) => set((state) => {
+    // Add to recently played (keep last 20)
+    const newRecentlyPlayed = [track, ...state.recentlyPlayed.filter(t => t.id !== track.id)].slice(0, 20);
+    get().syncRecentlyPlayedToFirebase(newRecentlyPlayed);
+    
+    return { 
+      currentTrack: track, 
+      progress: 0, 
+      isRightSidebarOpen: true,
+      recentlyPlayed: newRecentlyPlayed
+    };
+  }),
   setCurrentTrackDuration: (duration) => set((state) => ({
     currentTrack: state.currentTrack ? { ...state.currentTrack, duration } : null
   })),
@@ -157,10 +183,100 @@ export const usePlayerStore = create<PlayerState>()(
 
     set((state) => {
       const isLiked = state.likedSongs.some(s => s.id === track.id);
+      let newLikedSongs;
       if (isLiked) {
-        return { likedSongs: state.likedSongs.filter(s => s.id !== track.id) };
+        newLikedSongs = state.likedSongs.filter(s => s.id !== track.id);
+      } else {
+        newLikedSongs = [...state.likedSongs, track];
       }
-      return { likedSongs: [...state.likedSongs, track] };
+      
+      // Async sync to firebase
+      get().syncLikedSongsToFirebase(newLikedSongs);
+      
+      return { likedSongs: newLikedSongs };
+    });
+  },
+  
+  setLikedSongs: (songs) => set({ likedSongs: songs }),
+  
+  syncLikedSongsToFirebase: async (songs) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, { likedSongs: songs }, { merge: true });
+    } catch (error) {
+      console.error('Error syncing liked songs:', error);
+    }
+  },
+  
+  setRecentlyPlayed: (songs) => set({ recentlyPlayed: songs }),
+  
+  syncRecentlyPlayedToFirebase: async (songs) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, { recentlyPlayed: songs }, { merge: true });
+    } catch (error) {
+      console.error('Error syncing recently played:', error);
+    }
+  },
+  
+  setUserPlaylists: (playlists) => set({ userPlaylists: playlists }),
+
+  createPlaylist: async (name) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    const newPlaylist = {
+      id: `playlist_${Date.now()}`,
+      title: name,
+      tracks: [],
+      createdAt: new Date().toISOString()
+    };
+    
+    set((state) => {
+      const updatedPlaylists = [...state.userPlaylists, newPlaylist];
+      // Sync to firebase
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { userPlaylists: updatedPlaylists }, { merge: true });
+      return { userPlaylists: updatedPlaylists };
+    });
+  },
+
+  addSongToPlaylist: async (playlistId, track) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    
+    set((state) => {
+      const updatedPlaylists = state.userPlaylists.map(p => {
+        if (p.id === playlistId) {
+          // Avoid duplicates
+          if (p.tracks.some((t: any) => t.id === track.id)) return p;
+          return { ...p, tracks: [...p.tracks, track] };
+        }
+        return p;
+      });
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { userPlaylists: updatedPlaylists }, { merge: true });
+      return { userPlaylists: updatedPlaylists };
+    });
+  },
+
+  removeSongFromPlaylist: async (playlistId, trackId) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    
+    set((state) => {
+      const updatedPlaylists = state.userPlaylists.map(p => {
+        if (p.id === playlistId) {
+          return { ...p, tracks: p.tracks.filter((t: any) => t.id !== trackId) };
+        }
+        return p;
+      });
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { userPlaylists: updatedPlaylists }, { merge: true });
+      return { userPlaylists: updatedPlaylists };
     });
   },
   
@@ -185,6 +301,8 @@ export const usePlayerStore = create<PlayerState>()(
   partialize: (state) => ({ 
     likedSongs: state.likedSongs,
     savedPlaylists: state.savedPlaylists,
+    userPlaylists: state.userPlaylists,
+    recentlyPlayed: state.recentlyPlayed,
     volume: state.volume,
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,

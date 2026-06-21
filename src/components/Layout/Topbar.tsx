@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Home, Search, Bell, Download, User, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { auth } from '@/lib/firebase';
@@ -12,7 +12,24 @@ const Topbar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, openLoginModal } = useAuthStore();
-  const [searchInput, setSearchInput] = useState('');
+  const searchParams = useSearchParams();
+  // Initialize searchInput with URL param if it exists on mount
+  const [searchInput, setSearchInput] = useState(searchParams.get('q') || '');
+
+  // Keep searchInput in sync with URL if it changes externally
+  React.useEffect(() => {
+    const q = searchParams.get('q') || '';
+    setSearchInput(q);
+  }, [searchParams]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchInput(val);
+    
+    if (pathname === '/search') {
+      router.replace(`/search?q=${encodeURIComponent(val)}`);
+    }
+  };
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchInput.trim()) {
@@ -45,7 +62,7 @@ const Topbar: React.FC = () => {
             placeholder="What do you want to play?" 
             className="topbar-search-input"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={handleSearchChange}
             onKeyDown={handleSearchSubmit}
             onFocus={() => {
               if (pathname !== '/search') {

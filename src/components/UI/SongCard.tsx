@@ -2,6 +2,7 @@ import React from 'react';
 import { Play, Heart, MoreHorizontal } from 'lucide-react';
 import type { Track } from '@/store/playerStore';
 import { usePlayerStore } from '@/store/playerStore';
+import AddToPlaylistModal from './AddToPlaylistModal';
 import './Cards.css';
 
 interface SongCardProps {
@@ -12,6 +13,7 @@ interface SongCardProps {
 
 export const SongCard: React.FC<SongCardProps> = ({ track, index, onClick }) => {
   const { setCurrentTrack, currentTrack, isPlaying, setIsPlaying, youtubePlayer, likedSongs, toggleLikeSong } = usePlayerStore();
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
   const isLiked = likedSongs.some(s => s.id === track.id);
 
@@ -66,8 +68,16 @@ export const SongCard: React.FC<SongCardProps> = ({ track, index, onClick }) => 
         >
           <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
         </button>
-        <button className="song-action-btn"><MoreHorizontal size={20} /></button>
+        <button className="song-action-btn" onClick={() => setIsAddModalOpen(true)}>
+          <MoreHorizontal size={20} />
+        </button>
       </div>
+
+      <AddToPlaylistModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        track={track} 
+      />
     </div>
   );
 };

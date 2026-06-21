@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Music } from 'lucide-react';
 import { MediaCard } from '@/components/UI/MediaCard';
+import { usePlayerStore } from '@/store/playerStore';
+import CreatePlaylistModal from '@/components/UI/CreatePlaylistModal';
+import Link from 'next/link';
 import './Library.css';
 
 const Library: React.FC = () => {
+  const { likedSongs, userPlaylists } = usePlayerStore();
   const [activeTab, setActiveTab] = useState('Playlists');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const tabs = ['Playlists', 'Artists', 'Albums', 'Downloaded'];
   
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -33,7 +38,9 @@ const Library: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button className="icon-btn" style={{ background: 'transparent' }}><Search size={24} /></button>
-          <button className="icon-btn" style={{ background: 'transparent' }}><Plus size={24} /></button>
+          <button className="icon-btn" style={{ background: 'transparent' }} onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={24} />
+          </button>
         </div>
       </header>
 
@@ -53,12 +60,33 @@ const Library: React.FC = () => {
         {activeTab === 'Playlists' && (
           <>
             {/* Liked Songs Special Card */}
-            <div className="media-card" style={{ background: 'linear-gradient(135deg, #450af5, #c4efd9)' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px' }}>
-                <h3 className="text-2xl font-bold mb-2">Liked Songs</h3>
-                <p className="text-sm">248 songs</p>
+            <Link href="/library/liked-songs" style={{ textDecoration: 'none' }}>
+              <div className="media-card" style={{ background: 'linear-gradient(135deg, #450af5, #c4efd9)' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '16px' }}>
+                  <h3 className="text-2xl font-bold mb-2 text-white">Liked Songs</h3>
+                  <p className="text-sm text-white opacity-80">{likedSongs.length} songs</p>
+                </div>
               </div>
-            </div>
+            </Link>
+            {/* User Created Playlists */}
+            {userPlaylists.map(playlist => (
+              <Link href={`/library/playlist/${playlist.id}`} key={playlist.id} style={{ textDecoration: 'none' }}>
+                <div className="media-card" style={{ background: 'var(--color-surface-hover)' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px', alignItems: 'center', justifyContent: 'center' }}>
+                    {playlist.tracks.length > 0 && playlist.tracks[0].albumUrl ? (
+                      <img src={playlist.tracks[0].albumUrl} alt={playlist.title} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: 'var(--radius-sm)', marginBottom: '16px' }} />
+                    ) : (
+                      <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-sm)', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Music size={48} color="var(--color-text-secondary)" />
+                      </div>
+                    )}
+                    <h3 className="text-base font-bold mb-1 text-white text-center w-full truncate">{playlist.title}</h3>
+                    <p className="text-sm text-secondary text-center">Playlist • {playlist.tracks.length} songs</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+
             {playlists.map(p => <MediaCard key={p.id} item={p} />)}
           </>
         )}
@@ -66,6 +94,11 @@ const Library: React.FC = () => {
         {activeTab === 'Albums' && <div className="text-secondary" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>No albums saved yet.</div>}
         {activeTab === 'Downloaded' && <div className="text-secondary" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>No downloaded content.</div>}
       </div>
+
+      <CreatePlaylistModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 };
