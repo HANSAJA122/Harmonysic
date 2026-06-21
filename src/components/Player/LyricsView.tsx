@@ -6,7 +6,7 @@ import { fetchLyrics, LyricLine } from '@/lib/lyrics';
 import { X, Mic2, AlertCircle } from 'lucide-react';
 
 export const LyricsView: React.FC = () => {
-  const { currentTrack, isLyricsOpen, setLyricsOpen, progress } = usePlayerStore();
+  const { currentTrack, isLyricsOpen, setLyricsOpen, progress, youtubePlayer, setProgress } = usePlayerStore();
   const [lyrics, setLyrics] = useState<LyricLine[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +36,13 @@ export const LyricsView: React.FC = () => {
 
     loadLyrics();
   }, [currentTrack, isLyricsOpen]);
+
+  const handleSeek = (time: number) => {
+    if (youtubePlayer && typeof youtubePlayer.seekTo === 'function') {
+      youtubePlayer.seekTo(time, true);
+      setProgress(time);
+    }
+  };
 
   // Update active line based on progress
   useEffect(() => {
@@ -68,9 +75,10 @@ export const LyricsView: React.FC = () => {
     <div 
       className="fixed inset-0 z-[100] flex flex-col animate-slide-up"
       style={{ 
-        background: 'linear-gradient(to bottom, var(--color-surface), #000000)',
+        background: 'linear-gradient(to bottom, var(--dynamic-theme-color-dark, var(--color-surface)), #000000)',
         paddingTop: 'var(--spacing-16)', // Clear topbar space
-        paddingBottom: '120px' // Clear player space
+        paddingBottom: '120px', // Clear player space
+        transition: 'background 1s ease-in-out'
       }}
     >
       <header className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
@@ -110,14 +118,19 @@ export const LyricsView: React.FC = () => {
                 <div 
                   key={i}
                   ref={isActive ? activeLineRef : null}
-                  className={`text-3xl md:text-5xl font-bold transition-all duration-500 ease-out cursor-pointer ${
+                  onClick={() => handleSeek(line.time)}
+                  className={`text-3xl md:text-5xl font-bold transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] ${
                     isActive 
                       ? 'text-white scale-105 origin-left' 
                       : isPast
-                        ? 'text-white/30'
+                        ? 'text-white/30 hover:text-white/60'
                         : 'text-white/50 hover:text-white/80'
                   }`}
-                  style={{ lineHeight: '1.4' }}
+                  style={{ 
+                    lineHeight: '1.4',
+                    filter: isActive ? 'none' : 'blur(2px)',
+                    transform: isActive ? 'scale(1.05)' : 'scale(1)'
+                  }}
                 >
                   {line.text || '♪'}
                 </div>
