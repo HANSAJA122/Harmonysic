@@ -7,16 +7,12 @@ import { useAuthStore } from '@/store/authStore';
 import { LoginModal } from './LoginModal';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { setUser, setAuthLoading } = useAuthStore();
+  const { initAuthListener } = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setAuthLoading(false);
-    });
-
+    const unsubscribe = initAuthListener();
     return () => unsubscribe();
-  }, [setUser, setAuthLoading]);
+  }, [initAuthListener]);
 
   return (
     <>

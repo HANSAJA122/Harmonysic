@@ -298,10 +298,7 @@ export const usePlayerStore = create<PlayerState>()(
 {
   name: 'harmonysic-storage',
   partialize: (state) => ({ 
-    likedSongs: state.likedSongs,
     savedPlaylists: state.savedPlaylists,
-    userPlaylists: state.userPlaylists,
-    recentlyPlayed: state.recentlyPlayed,
     volume: state.volume,
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,
