@@ -6,12 +6,12 @@ import { X, MoreHorizontal, Play } from 'lucide-react';
 import './RightSidebar.css';
 
 const RightSidebar: React.FC = () => {
-  const { currentTrack, queue, queueIndex, isRightSidebarOpen, setRightSidebarOpen, setQueue } = usePlayerStore();
+  const { currentTrack, queue, currentIndex, isRightSidebarOpen, setRightSidebarOpen, setQueue } = usePlayerStore();
   const [activeTab, setActiveTab] = useState<'now-playing' | 'queue'>('queue');
 
   if (!currentTrack || !isRightSidebarOpen) return null;
 
-  const upNextTracks = queue.slice(queueIndex + 1);
+  const upNextTracks = queue.slice(currentIndex + 1);
 
   return (
     <aside className="right-sidebar">
@@ -78,7 +78,7 @@ const RightSidebar: React.FC = () => {
               <h3 className="queue-section-title" style={{ marginTop: '24px' }}>Up Next</h3>
               <div className="queue-list">
                 {upNextTracks.map((track, i) => {
-                  const absoluteIndex = queueIndex + 1 + i;
+                  const absoluteIndex = currentIndex + 1 + i;
                   return (
                     <div 
                       key={`${track.id}-${i}`} 
