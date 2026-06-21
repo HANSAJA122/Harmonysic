@@ -45,7 +45,6 @@ interface PlayerState {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   toggleLikeSong: (track: Track) => void;
-  toggleLikeSong: (track: Track) => void;
   toggleSavePlaylist: (playlist: any) => void;
   setLikedSongs: (songs: Track[]) => void;
   syncLikedSongsToFirebase: (songs: Track[]) => Promise<void>;
