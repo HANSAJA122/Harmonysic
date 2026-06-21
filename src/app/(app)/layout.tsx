@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import Topbar from '@/components/Layout/Topbar';
 import Sidebar from '@/components/Layout/Sidebar';
 import RightSidebar from '@/components/Layout/RightSidebar';
@@ -16,7 +17,9 @@ export default function AppLayout({
     <div className="app-layout">
       <AuthProvider>
         {/* Global Topbar */}
-        <Topbar />
+        <Suspense fallback={<div style={{height: 'var(--topbar-height)'}}></div>}>
+          <Topbar />
+        </Suspense>
 
         <div className="app-main-wrapper">
           {/* Desktop Left Sidebar */}
