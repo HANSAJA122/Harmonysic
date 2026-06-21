@@ -2,7 +2,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2 } from 'lucide-react';
-import { LyricsView } from './LyricsView';
 import { usePlayerStore } from '@/store/playerStore';
 import { FastAverageColor } from 'fast-average-color';
 import './MusicPlayer.css';
@@ -350,8 +349,6 @@ const MusicPlayer: React.FC = () => {
           </div>
         </div>
       )}
-
-      <LyricsView />
     </>
   );
 };

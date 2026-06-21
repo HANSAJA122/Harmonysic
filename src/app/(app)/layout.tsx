@@ -6,6 +6,7 @@ import BottomNav from '@/components/Layout/BottomNav';
 import MusicPlayer from '@/components/Player/MusicPlayer';
 import FullScreenPlayer from '@/components/Player/FullScreenPlayer';
 import { AuthProvider } from '@/components/Auth/AuthProvider';
+import { MainContentWrapper } from '@/components/Layout/MainContentWrapper';
 import '@/components/Layout/AppLayout.css';
 
 export default function AppLayout({
@@ -27,9 +28,9 @@ export default function AppLayout({
 
           {/* Center Main Content Area */}
           <main className="app-main">
-            <div style={{ flex: 1, overflowY: 'auto' }}>
+            <MainContentWrapper>
               {children}
-            </div>
+            </MainContentWrapper>
           </main>
 
           {/* Desktop Right Sidebar */}

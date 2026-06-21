@@ -3,17 +3,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchLyrics, LyricLine } from '@/lib/lyrics';
-import { X, Mic2, AlertCircle } from 'lucide-react';
+import { Mic2, AlertCircle } from 'lucide-react';
 
 export const LyricsView: React.FC = () => {
-  const { currentTrack, isLyricsOpen, setLyricsOpen, progress, youtubePlayer, setProgress } = usePlayerStore();
+  const { currentTrack, isLyricsOpen, progress, youtubePlayer, setProgress } = usePlayerStore();
   const [lyrics, setLyrics] = useState<LyricLine[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeLineIndex, setActiveLineIndex] = useState<number>(-1);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch lyrics when track changes or view opens
   useEffect(() => {
@@ -41,8 +43,31 @@ export const LyricsView: React.FC = () => {
     if (youtubePlayer && typeof youtubePlayer.seekTo === 'function') {
       youtubePlayer.seekTo(time, true);
       setProgress(time);
+      // Immediately cancel user scrolling to snap to the new lyric
+      setIsUserScrolling(false);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     }
   };
+
+  const handleUserInteraction = () => {
+    setIsUserScrolling(true);
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsUserScrolling(false);
+      // Snap back to active line when timeout finishes
+      if (activeLineRef.current) {
+         activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 3000);
+  };
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   // Update active line based on progress
   useEffect(() => {
@@ -59,44 +84,26 @@ export const LyricsView: React.FC = () => {
     if (activeIndex !== -1 && activeIndex !== activeLineIndex) {
       setActiveLineIndex(activeIndex);
       
-      // Smooth scroll to the active line
-      if (activeLineRef.current && containerRef.current) {
+      // Smooth scroll to the active line ONLY if user is not manually scrolling
+      if (!isUserScrolling && activeLineRef.current && containerRef.current) {
         activeLineRef.current.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
       }
     }
-  }, [progress, lyrics, isLyricsOpen, activeLineIndex]);
+  }, [progress, lyrics, isLyricsOpen, activeLineIndex, isUserScrolling]);
 
+  // If lyrics aren't open, don't render (handled mostly by Wrapper now, but good safety)
   if (!isLyricsOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex flex-col animate-slide-up"
-      style={{ 
-        background: 'linear-gradient(to bottom, var(--dynamic-theme-color-dark, var(--color-surface)), #000000)',
-        paddingTop: 'var(--spacing-16)', // Clear topbar space
-        paddingBottom: '120px', // Clear player space
-        transition: 'background 1s ease-in-out'
-      }}
-    >
-      <header className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
-        <div>
-          <h2 className="text-xl font-bold">{currentTrack?.title}</h2>
-          <p className="text-secondary">{currentTrack?.artist}</p>
-        </div>
-        <button 
-          onClick={() => setLyricsOpen(false)}
-          className="icon-btn hover:bg-white/10 p-2 rounded-full transition-colors"
-        >
-          <X size={24} />
-        </button>
-      </header>
-
+    <div className="flex flex-col h-full w-full relative animate-fade-in">
       <div 
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-8 md:px-24 py-12 hide-scrollbar scroll-smooth"
+        onWheel={handleUserInteraction}
+        onTouchMove={handleUserInteraction}
+        className="flex-1 overflow-y-auto px-8 md:px-24 hide-scrollbar"
       >
         {isLoading ? (
           <div className="h-full flex flex-col items-center justify-center text-secondary">
@@ -109,7 +116,7 @@ export const LyricsView: React.FC = () => {
             <p className="text-xl font-bold">{error}</p>
           </div>
         ) : lyrics ? (
-          <div className="max-w-3xl mx-auto space-y-8 pb-32 pt-16">
+          <div className="max-w-4xl mx-auto pb-[50vh] pt-[40vh]">
             {lyrics.map((line, i) => {
               const isActive = i === activeLineIndex;
               const isPast = i < activeLineIndex;
@@ -119,17 +126,15 @@ export const LyricsView: React.FC = () => {
                   key={i}
                   ref={isActive ? activeLineRef : null}
                   onClick={() => handleSeek(line.time)}
-                  className={`text-3xl md:text-5xl font-bold transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] ${
+                  className={`text-4xl md:text-6xl font-bold transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] mb-6 ${
                     isActive 
-                      ? 'text-white scale-105 origin-left' 
-                      : isPast
-                        ? 'text-white/30 hover:text-white/60'
-                        : 'text-white/50 hover:text-white/80'
+                      ? 'text-white scale-[1.02] origin-left' 
+                      : 'text-white/40 hover:text-white/80 origin-left'
                   }`}
                   style={{ 
-                    lineHeight: '1.4',
-                    filter: isActive ? 'none' : 'blur(2px)',
-                    transform: isActive ? 'scale(1.05)' : 'scale(1)'
+                    lineHeight: '1.5',
+                    filter: isActive ? 'none' : 'blur(1px)',
+                    transform: isActive ? 'scale(1.02)' : 'scale(1)'
                   }}
                 >
                   {line.text || '♪'}
