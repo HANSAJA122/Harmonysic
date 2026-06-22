@@ -121,6 +121,7 @@
 .player-expanded-content {
   display: flex;
   flex: 1;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   margin-left: 16px;
@@ -146,6 +147,7 @@
   cursor: pointer;
   flex: 1;
   min-width: 0;
+  max-width: 130px; /* Bulletproof fallback */
   overflow: hidden;
 }
 
