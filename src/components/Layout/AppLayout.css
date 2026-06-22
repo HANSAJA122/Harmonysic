@@ -38,8 +38,8 @@
 
   .app-main {
     background: rgba(34, 28, 30, 0.45); /* Semi-transparent var(--color-surface) */
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: var(--panel-radius);
     margin-right: 0;
     min-width: 400px;

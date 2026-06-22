@@ -14,7 +14,6 @@
 .aura-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
   opacity: 0.6;
   animation: float 20s infinite ease-in-out alternate;
   will-change: transform;
