@@ -48,10 +48,10 @@
   --sidebar-width-min: 280px;
   --sidebar-width-collapsed: 72px;
 
-  /* Spotify Floating Layout */
-  --layout-gap: 8px;
-  --panel-radius: 8px;
-  --layout-padding: 8px;
+  /* Spatial Floating Layout */
+  --layout-gap: 16px;
+  --panel-radius: 24px;
+  --layout-padding: 16px;
 }
 
 [data-theme='light'] {

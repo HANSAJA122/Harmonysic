@@ -7,6 +7,7 @@ import MusicPlayer from '@/components/Player/MusicPlayer';
 import FullScreenPlayer from '@/components/Player/FullScreenPlayer';
 import { AuthProvider } from '@/components/Auth/AuthProvider';
 import { MainContentWrapper } from '@/components/Layout/MainContentWrapper';
+import { LiquidAura } from '@/components/UI/LiquidAura';
 import '@/components/Layout/AppLayout.css';
 
 export default function AppLayout({
@@ -16,6 +17,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="app-layout">
+      <LiquidAura />
       <AuthProvider>
         {/* Global Topbar */}
         <Suspense fallback={<div style={{height: 'var(--topbar-height)'}}></div>}>

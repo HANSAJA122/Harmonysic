@@ -2,11 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Clock, Settings } from 'lucide-react';
 import { MediaCard } from '@/components/UI/MediaCard';
-import { SongCard } from '@/components/UI/SongCard';
 import { usePlayerStore, Track } from '@/store/playerStore';
-import { QuickPickCard } from '@/components/UI/QuickPickCard';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -35,33 +32,19 @@ const Home: React.FC = () => {
     fetchHomeData();
   }, []);
 
-  // Use playlists for the Quick Picks
-  const quickPicks = playlists.slice(0, 8);
-
   return (
     <div className="home-page animate-fade-in">
       <div className="home-content-wrapper">
         <div className="home-header-pills">
           <button className="home-filter-pill active">All</button>
           <button className="home-filter-pill">Music</button>
-        </div>
-
-        {/* Quick Picks 2x4 Grid */}
-        <div className="quick-picks-grid">
-          {quickPicks.map((playlist, index) => (
-            <QuickPickCard 
-              key={playlist.id}
-              title={playlist.title}
-              imageUrl={playlist.imageUrl}
-              onClick={() => router.push(`/playlist/${playlist.id}`)}
-            />
-          ))}
+          <button className="home-filter-pill">Podcasts</button>
         </div>
 
         {recentlyPlayed && recentlyPlayed.length > 0 && (
           <section className="section">
             <div className="section-header">
-              <h2 className="section-title">Recently Played</h2>
+              <h2 className="section-title">Jump Back In</h2>
               <button className="section-more">Show all</button>
             </div>
             <div className="horizontal-scroll">
@@ -84,15 +67,15 @@ const Home: React.FC = () => {
 
         <section className="section">
           <div className="section-header">
-            <h2 className="section-title">Trending Music Globally</h2>
+            <h2 className="section-title">The Global Pulse</h2>
             <button className="section-more">Show all</button>
           </div>
           
           {isLoading ? (
-            <div style={{ padding: '20px', color: 'var(--color-text-secondary)' }}>Loading live data...</div>
+            <div style={{ padding: '20px', color: 'var(--color-text-secondary)' }}>Curating your experience...</div>
           ) : (
             <div className="horizontal-scroll">
-              {trendingTracks.slice(0, 6).map((track, index) => (
+              {trendingTracks.slice(0, 8).map((track, index) => (
                 <div key={track.id} className="scroll-item" onClick={() => setQueue(trendingTracks, index)}>
                   <MediaCard 
                     item={{
@@ -111,7 +94,7 @@ const Home: React.FC = () => {
 
         <section className="section">
           <div className="section-header">
-            <h2 className="section-title">Made For You</h2>
+            <h2 className="section-title">Handpicked For You</h2>
             <button className="section-more">Show all</button>
           </div>
           <div className="horizontal-scroll">
@@ -128,7 +111,7 @@ const Home: React.FC = () => {
 
         <section className="section">
           <div className="section-header">
-            <h2 className="section-title">Popular Artists</h2>
+            <h2 className="section-title">Iconic Artists</h2>
             <button className="section-more">Show all</button>
           </div>
           <div className="horizontal-scroll">

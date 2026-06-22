@@ -8,21 +8,7 @@
   position: relative;
 }
 
-/* Global Spotify-style immersive background glow */
-.app-layout::before {
-  content: '';
-  position: absolute;
-  top: -30%;
-  left: -20%;
-  width: 140%;
-  height: 120%;
-  background: radial-gradient(circle at 40% 20%, var(--dynamic-theme-color-dark, transparent) 0%, transparent 60%);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
-  transition: background 1.5s ease-in-out;
-  filter: blur(100px);
-}
+/* Background glow moved to LiquidAura.tsx */
 
 .app-main-wrapper {
   display: flex;
@@ -45,16 +31,19 @@
 @media (min-width: 768px) {
   .app-main-wrapper {
     padding: var(--layout-padding);
-    padding-bottom: 0;
+    padding-bottom: var(--layout-padding); /* Added bottom padding since player is floating */
     gap: var(--layout-gap);
-    /* Leave exactly the height of the desktop player + a tiny bottom padding/gap for the grid */
-    height: calc(100vh - var(--player-height-desktop) - var(--topbar-height) - var(--layout-gap));
+    height: calc(100vh - var(--topbar-height) - var(--layout-padding));
   }
 
   .app-main {
-    background-color: var(--color-surface);
+    background: rgba(34, 28, 30, 0.45); /* Semi-transparent var(--color-surface) */
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     border-radius: var(--panel-radius);
     margin-right: 0;
-    min-width: 400px; /* Prevent it from shrinking too much when sidebars are open */
+    min-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 }
