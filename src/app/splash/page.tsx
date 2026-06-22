@@ -18,11 +18,7 @@ const Splash: React.FC = () => {
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}>
       <div className="animate-pulse" style={{ color: 'var(--color-primary)', marginBottom: 'var(--spacing-4)' }}>
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18V5l12-2v13"></path>
-          <circle cx="6" cy="18" r="3"></circle>
-          <circle cx="18" cy="16" r="3"></circle>
-        </svg>
+        <img src="/icon.svg" alt="Harmonics Audio" width="80" height="80" style={{ borderRadius: '18px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
       </div>
       <h1 className="text-3xl font-bold animate-fade-in" style={{ letterSpacing: '2px' }}>HARMONY</h1>
       

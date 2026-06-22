@@ -1,19 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    <!-- Dark Violet / Space Gray Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D1B3D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A1025;stop-opacity:1" />
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+
+    <!-- Rose Gold Metal Gradient for the Monogram -->
+    <linearGradient id="roseGoldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E3907F;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFC6B6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E89A8B;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Rose Gold Highlight Gradient for 3D effect -->
+    <linearGradient id="roseGoldHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#E3907F;stop-opacity:0" />
+    </linearGradient>
+
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
     </filter>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#0A0A0A" />
-  <text x="50%" y="55%" font-family="system-ui, sans-serif" font-weight="900" font-size="300" text-anchor="middle" dominant-baseline="middle" fill="url(#grad)" filter="url(#glow)">H</text>
-  <path d="M 330 150 Q 380 150 400 200" stroke="#3B82F6" stroke-width="24" fill="none" stroke-linecap="round" />
-  <circle cx="330" cy="150" r="12" fill="#8B5CF6" />
+
+  <!-- Background Base -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)" />
+  
+  <!-- Inner Bevel/Border -->
+  <rect x="16" y="16" width="480" height="480" rx="100" fill="none" stroke="url(#roseGoldGrad)" stroke-width="4" stroke-opacity="0.3" />
+
+  <!-- The HD Monogram Group -->
+  <g filter="url(#dropShadow)" transform="translate(16, 0)">
+    
+    <!-- Outer Base (Shadow/Thickness) -->
+    <path d="M 160 160 
+             L 160 352 
+             M 160 256 
+             C 220 256, 220 160, 280 160 
+             L 280 352
+             M 280 256
+             C 340 256, 380 220, 380 160
+             C 440 180, 440 332, 380 352
+             C 340 360, 280 352, 280 256" 
+          fill="none" 
+          stroke="url(#roseGoldGrad)" 
+          stroke-width="52" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Inner Highlight for 3D Bevel effect -->
+    <path d="M 160 160 
+             L 160 352 
+             M 160 256 
+             C 220 256, 220 160, 280 160 
+             L 280 352
+             M 280 256
+             C 340 256, 380 220, 380 160
+             C 440 180, 440 332, 380 352
+             C 340 360, 280 352, 280 256" 
+          fill="none" 
+          stroke="url(#roseGoldHighlight)" 
+          stroke-width="20" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+  </g>
 </svg>
