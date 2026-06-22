@@ -1,10 +1,21 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 
 export default function PlayerStateProvider({ children }: { children: React.ReactNode }) {
-  // We use this component to render the FullScreenPlayer conditionally based on Zustand state, 
-  // since layout.tsx is a Server Component and cannot directly consume Zustand state.
+  const { isPlaying, incrementListeningTime } = usePlayerStore();
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      // Increment listening time by 5 seconds every 5 seconds
+      interval = setInterval(() => {
+        incrementListeningTime(5);
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, incrementListeningTime]);
+
   return <>{children}</>;
 }

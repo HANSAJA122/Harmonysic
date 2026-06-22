@@ -3,59 +3,47 @@
 import React, { useMemo } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useAuthStore } from '@/store/authStore';
-import { Clock, Heart, PlayCircle, User, Sun, Moon } from 'lucide-react';
+import { Clock, Heart, PlayCircle, User, Sun, Moon, CalendarDays } from 'lucide-react';
+import MonthlyRecapModal from './MonthlyRecapModal';
 import './ProfileView.css';
 
 export default function ProfileView() {
   const { user } = useAuthStore();
-  const { likedSongs, recentlyPlayed, setQueue, theme, toggleTheme } = usePlayerStore();
+  const { likedSongs, setQueue, theme, toggleTheme, listeningStats } = usePlayerStore();
+  const [isRecapOpen, setIsRecapOpen] = React.useState(false);
 
-  // Aggregate stats
+  // Aggregate stats from listeningStats (Current Month)
   const stats = useMemo(() => {
     const totalLiked = likedSongs.length;
-    const totalRecentlyPlayed = recentlyPlayed.length;
+    const month = new Date().toISOString().substring(0, 7);
+    const currentMonthStats = listeningStats[month] || {
+      totalSeconds: 0,
+      tracksPlayed: 0,
+      topArtists: {},
+      topTracks: {}
+    };
     
-    // Combine liked and recently played to find top artists
-    const artistCounts: Record<string, number> = {};
-    const trackPlayCounts: Record<string, { track: any, count: number }> = {};
-    
-    const allTracks = [...likedSongs, ...recentlyPlayed];
-    
-    allTracks.forEach(track => {
-      // Count Artists
-      if (track.artist) {
-        artistCounts[track.artist] = (artistCounts[track.artist] || 0) + 1;
-      }
-      // Count specific tracks (using ID as key)
-      if (track.id) {
-        if (!trackPlayCounts[track.id]) {
-          trackPlayCounts[track.id] = { track, count: 0 };
-        }
-        trackPlayCounts[track.id].count += 1;
-      }
-    });
-
-    const topArtists = Object.entries(artistCounts)
+    const topArtists = Object.entries(currentMonthStats.topArtists)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([name, count]) => ({ name, count }));
 
-    const topTracks = Object.values(trackPlayCounts)
+    const topTracks = Object.values(currentMonthStats.topTracks)
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
       .map(t => t.track);
 
-    // Approximate listening time: 3 mins per track
-    const totalMinutes = totalRecentlyPlayed * 3;
+    const totalMinutes = Math.floor(currentMonthStats.totalSeconds / 60);
 
     return {
       totalLiked,
-      totalRecentlyPlayed,
+      totalRecentlyPlayed: currentMonthStats.tracksPlayed,
       topArtists,
       topTracks,
-      totalMinutes
+      totalMinutes,
+      month
     };
-  }, [likedSongs, recentlyPlayed]);
+  }, [likedSongs, listeningStats]);
 
   if (!user) {
     return (
@@ -136,8 +124,23 @@ export default function ProfileView() {
           </div>
         </div>
 
+        {/* Recap Section */}
+        <div className="profile-section mt-8" style={{ background: 'linear-gradient(135deg, var(--color-primary), #9d4edd)', borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px' }}>
+          <div>
+            <h2 style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>Your Monthly Recap</h2>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>See what you've been listening to this month.</p>
+          </div>
+          <button 
+            onClick={() => setIsRecapOpen(true)}
+            style={{ background: '#fff', color: 'var(--color-primary)', border: 'none', padding: '12px 24px', borderRadius: 'var(--radius-full)', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <CalendarDays size={20} />
+            View Recap
+          </button>
+        </div>
+
         {/* Top Tracks */}
-        <div className="profile-section mt-8">
+        <div className="profile-section mt-8" style={{ marginTop: '24px' }}>
           <h2 className="section-title">Your Most Played Songs</h2>
           <div className="track-list">
             {stats.topTracks.length > 0 ? (
@@ -194,6 +197,8 @@ export default function ProfileView() {
           </div>
         </div>
       </div>
+      
+      {isRecapOpen && <MonthlyRecapModal stats={stats} onClose={() => setIsRecapOpen(false)} />}
     </div>
   );
 }

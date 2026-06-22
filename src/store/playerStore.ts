@@ -24,6 +24,14 @@ export interface Track {
   duration: number; // in seconds
 }
 
+export interface MonthlyStats {
+  month: string; // "YYYY-MM"
+  totalSeconds: number;
+  tracksPlayed: number;
+  topArtists: Record<string, number>;
+  topTracks: Record<string, { track: Track; count: number }>;
+}
+
 interface PlayerState {
   currentTrack: Track | null;
   isPlaying: boolean;
@@ -75,6 +83,9 @@ interface PlayerState {
   reorderUserPlaylistTracks: (playlistId: string, fromIndex: number, toIndex: number) => Promise<void>;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  listeningStats: Record<string, MonthlyStats>;
+  recordTrackPlay: (track: Track) => void;
+  incrementListeningTime: (seconds: number) => void;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -97,15 +108,83 @@ export const usePlayerStore = create<PlayerState>()(
   recentlyPlayed: [],
   guestPlayCount: 0,
   theme: 'dark',
+  listeningStats: {},
   youtubePlayer: null,
   setYoutubePlayer: (player) => set({ youtubePlayer: player }),
   
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
+  recordTrackPlay: (track) => set((state) => {
+    const month = new Date().toISOString().substring(0, 7); // YYYY-MM
+    const currentStats = state.listeningStats[month] || {
+      month,
+      totalSeconds: 0,
+      tracksPlayed: 0,
+      topArtists: {},
+      topTracks: {}
+    };
+
+    const newStats = { ...currentStats };
+    newStats.tracksPlayed += 1;
+    
+    if (track.artist) {
+      newStats.topArtists[track.artist] = (newStats.topArtists[track.artist] || 0) + 1;
+    }
+    
+    if (track.id) {
+      if (!newStats.topTracks[track.id]) {
+        newStats.topTracks[track.id] = { track, count: 0 };
+      }
+      newStats.topTracks[track.id].count += 1;
+    }
+
+    // Sync to firebase if user exists
+    const user = useAuthStore.getState().user;
+    if (user) {
+      updateDoc(doc(db, 'users', user.uid), {
+        [`listeningStats.${month}`]: newStats
+      }).catch(e => console.warn('Failed to sync listening stats', e));
+    }
+
+    return {
+      listeningStats: {
+        ...state.listeningStats,
+        [month]: newStats
+      }
+    };
+  }),
+
+  incrementListeningTime: (seconds) => set((state) => {
+    const month = new Date().toISOString().substring(0, 7); // YYYY-MM
+    const currentStats = state.listeningStats[month] || {
+      month,
+      totalSeconds: 0,
+      tracksPlayed: 0,
+      topArtists: {},
+      topTracks: {}
+    };
+
+    const newStats = { ...currentStats };
+    newStats.totalSeconds += seconds;
+
+    // We don't sync this to Firebase every second to avoid quota limits.
+    // It gets persisted to localStorage via partialize.
+    
+    return {
+      listeningStats: {
+        ...state.listeningStats,
+        [month]: newStats
+      }
+    };
+  }),
+
   setCurrentTrack: (track) => set((state) => {
     // Add to recently played (keep last 20)
     const newRecentlyPlayed = [track, ...state.recentlyPlayed.filter(t => t.id !== track.id)].slice(0, 20);
     get().syncRecentlyPlayedToFirebase(newRecentlyPlayed);
+    if (track) {
+      get().recordTrackPlay(track);
+    }
     
     const user = useAuthStore.getState().user;
     if (user && track) {
@@ -441,7 +520,8 @@ export const usePlayerStore = create<PlayerState>()(
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,
     guestPlayCount: state.guestPlayCount,
-    theme: state.theme
+    theme: state.theme,
+    listeningStats: state.listeningStats
   }),
 }
 ));
