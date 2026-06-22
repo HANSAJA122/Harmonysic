@@ -12,11 +12,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    const multiKeysStr = process.env.GEMINI_API_KEYS;
+    const singleKey = process.env.GEMINI_API_KEY;
+
+    let selectedKey = null;
+
+    if (multiKeysStr) {
+      const keys = multiKeysStr.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      if (keys.length > 0) {
+        // Randomly pick a key to distribute the load and avoid rate limits!
+        selectedKey = keys[Math.floor(Math.random() * keys.length)];
+      }
+    }
+
+    if (!selectedKey) {
+      selectedKey = singleKey;
+    }
+
+    if (!selectedKey) {
       return NextResponse.json({ error: 'Gemini API key is not configured' }, { status: 500 });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: selectedKey });
 
     // 1. Call Gemini to generate a playlist
     const systemInstruction = "You are a professional music curator. The user will give you a prompt. You must generate a playlist of 10-15 songs that perfectly matches the prompt. Your response must be ONLY a valid JSON array of objects. Each object must have exactly two string properties: 'title' and 'artist'. Do not include markdown formatting or backticks. Only output raw JSON.";
