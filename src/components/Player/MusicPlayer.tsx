@@ -3,6 +3,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2, PictureInPicture } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
+import { useAuthStore } from '@/store/authStore';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { FastAverageColor } from 'fast-average-color';
 import './MusicPlayer.css';
 
@@ -19,15 +22,59 @@ const MusicPlayer: React.FC = () => {
   
   const isCurrentTrackLiked = currentTrack ? likedSongs.some(s => s.id === currentTrack.id) : false;
   
+  const { user } = useAuthStore();
   const ytPlayerRef = useRef<any>(null);
   const pipVideoRef = useRef<HTMLVideoElement>(null);
   const pipCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
+  const [remoteSession, setRemoteSession] = useState<any>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Multi-Device Sync (Harmonysic Connect)
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
+      const data = snapshot.data();
+      if (data?.currentlyPlaying) {
+        const remote = data.currentlyPlaying;
+        const localId = localStorage.getItem('harmonysic_device_id');
+        if (remote.deviceId && remote.deviceId !== localId) {
+          setRemoteSession(remote);
+          // If we are currently playing, and another device took over, pause local playback
+          const state = usePlayerStore.getState();
+          if (state.isPlaying) {
+             state.setIsPlaying(false);
+             if (ytPlayerRef.current && state.youtubePlayer) {
+               ytPlayerRef.current.pauseVideo();
+             }
+          }
+        } else {
+          setRemoteSession(null);
+        }
+      } else {
+        setRemoteSession(null);
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleTakeover = () => {
+    if (!remoteSession) return;
+    // We recreate the track object as best as we can
+    const trackToResume = {
+      id: remoteSession.trackId,
+      title: remoteSession.title,
+      artist: remoteSession.artist,
+      albumUrl: remoteSession.albumUrl,
+      duration: 180 // default
+    };
+    usePlayerStore.getState().setCurrentTrack(trackToResume);
+    usePlayerStore.getState().setIsPlaying(true);
+  };
 
   const startPiP = async () => {
     try {
@@ -344,21 +391,50 @@ const MusicPlayer: React.FC = () => {
         </div>
       )}
 
-      {currentTrack && (
-        <div className="music-player" onClick={handlePlayerClick}>
-          <div className="player-left">
-            <img src={currentTrack.albumUrl} alt={currentTrack.title} className="player-artwork" />
-            <div className="player-track-info">
-              <span className="player-title">{currentTrack.title}</span>
-              <span className="player-artist">{currentTrack.artist}</span>
+      {(currentTrack || remoteSession) && (() => {
+        const displayTrack = currentTrack || remoteSession;
+        return (
+        <div className="music-player" onClick={handlePlayerClick} style={{ position: 'relative' }}>
+          
+          {remoteSession && !currentTrack && (
+            <div style={{ position: 'absolute', top: '-40px', left: 0, right: 0, background: 'var(--color-primary)', color: 'black', padding: '8px', textAlign: 'center', fontSize: '13px', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', zIndex: 10 }}>
+              Listening on another device
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleTakeover(); }}
+                style={{ background: 'black', color: 'white', border: 'none', padding: '4px 12px', borderRadius: '99px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Listen Here
+              </button>
             </div>
-            <button 
-              className="player-control-btn" 
-              style={{ marginLeft: 'var(--spacing-2)', color: isCurrentTrackLiked ? 'var(--color-primary)' : 'inherit' }}
-              onClick={(e) => { e.stopPropagation(); toggleLikeSong(currentTrack); }}
-            >
-              <Heart size={16} fill={isCurrentTrackLiked ? "currentColor" : "none"} />
-            </button>
+          )}
+
+          {remoteSession && currentTrack && !isPlaying && (
+            <div style={{ position: 'absolute', top: '-40px', left: 0, right: 0, background: 'var(--color-primary)', color: 'black', padding: '8px', textAlign: 'center', fontSize: '13px', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', zIndex: 10 }}>
+              Playback paused because you started listening on another device.
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsPlaying(true); }}
+                style={{ background: 'black', color: 'white', border: 'none', padding: '4px 12px', borderRadius: '99px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Take Over
+              </button>
+            </div>
+          )}
+
+          <div className="player-left">
+            <img src={displayTrack.albumUrl} alt={displayTrack.title} className="player-artwork" />
+            <div className="player-track-info">
+              <span className="player-title">{displayTrack.title}</span>
+              <span className="player-artist">{displayTrack.artist}</span>
+            </div>
+            {currentTrack && (
+              <button 
+                className="player-control-btn" 
+                style={{ marginLeft: 'var(--spacing-2)', color: isCurrentTrackLiked ? 'var(--color-primary)' : 'inherit' }}
+                onClick={(e) => { e.stopPropagation(); toggleLikeSong(currentTrack); }}
+              >
+                <Heart size={16} fill={isCurrentTrackLiked ? "currentColor" : "none"} />
+              </button>
+            )}
           </div>
 
           <div className="player-center" onClick={(e) => e.stopPropagation()}>
@@ -436,19 +512,22 @@ const MusicPlayer: React.FC = () => {
           </div>
 
           <div className="mobile-player-controls" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="player-control-btn"
-              onClick={(e) => { e.stopPropagation(); toggleLikeSong(currentTrack); }}
-              style={{ color: isCurrentTrackLiked ? 'var(--color-primary)' : 'inherit' }}
-            >
-              <Heart size={20} fill={isCurrentTrackLiked ? "currentColor" : "none"} />
-            </button>
+            {currentTrack && (
+              <button 
+                className="player-control-btn"
+                onClick={(e) => { e.stopPropagation(); toggleLikeSong(currentTrack); }}
+                style={{ color: isCurrentTrackLiked ? 'var(--color-primary)' : 'inherit' }}
+              >
+                <Heart size={20} fill={isCurrentTrackLiked ? "currentColor" : "none"} />
+              </button>
+            )}
             <button className="player-play-btn" onClick={handlePlayPauseClick} style={{ backgroundColor: 'transparent', color: 'var(--color-text-primary)' }}>
               {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
             </button>
           </div>
         </div>
-      )}
+        );
+      })()}
       <canvas ref={pipCanvasRef} style={{ display: 'none' }} />
       <video ref={pipVideoRef} muted playsInline style={{ display: 'none' }} />
     </>

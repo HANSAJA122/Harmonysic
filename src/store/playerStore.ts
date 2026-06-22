@@ -4,6 +4,18 @@ import { useAuthStore } from './authStore';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
+const getDeviceId = () => {
+  if (typeof window !== 'undefined') {
+    let id = localStorage.getItem('harmonysic_device_id');
+    if (!id) {
+      id = 'device_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('harmonysic_device_id', id);
+    }
+    return id;
+  }
+  return 'unknown';
+};
+
 export interface Track {
   id: string;
   title: string;
@@ -97,7 +109,8 @@ export const usePlayerStore = create<PlayerState>()(
           artist: track.artist,
           albumUrl: track.albumUrl,
           isPlaying: true,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          deviceId: getDeviceId()
         }
       }).catch(e => console.warn('Failed to sync track state', e));
     } else if (user && !track) {
@@ -121,7 +134,8 @@ export const usePlayerStore = create<PlayerState>()(
     if (user && state.currentTrack) {
       updateDoc(doc(db, 'users', user.uid), {
         'currentlyPlaying.isPlaying': isPlaying,
-        'currentlyPlaying.updatedAt': new Date().toISOString()
+        'currentlyPlaying.updatedAt': new Date().toISOString(),
+        'currentlyPlaying.deviceId': getDeviceId()
       }).catch(e => console.warn('Failed to sync play state', e));
     }
     return { isPlaying };
@@ -132,7 +146,8 @@ export const usePlayerStore = create<PlayerState>()(
     if (user && state.currentTrack) {
       updateDoc(doc(db, 'users', user.uid), {
         'currentlyPlaying.isPlaying': newIsPlaying,
-        'currentlyPlaying.updatedAt': new Date().toISOString()
+        'currentlyPlaying.updatedAt': new Date().toISOString(),
+        'currentlyPlaying.deviceId': getDeviceId()
       }).catch(e => console.warn('Failed to sync play state', e));
     }
     return { isPlaying: newIsPlaying };
