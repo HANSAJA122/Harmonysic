@@ -150,16 +150,18 @@
 .player-track-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 0; /* Crucial for text-overflow to work in flex */
-  overflow: hidden;
-  margin-right: 16px;
+  margin-left: 12px;
+  cursor: pointer;
+  max-width: 110px; /* Strictly prevent overflow */
+  flex-shrink: 0;
 }
 
 .player-title {
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-text-primary);
+  margin-bottom: 2px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -168,6 +170,7 @@
 .player-artist {
   font-size: 0.75rem;
   color: var(--color-text-secondary);
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
