@@ -106,3 +106,35 @@
   letter-spacing: -0.02em;
   margin-top: 16px;
 }
+
+.lyric-line {
+  /* existing stuff gets overwritten by this if we redefine, but wait, I should append */
+}
+
+.lyric-share-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  margin-left: 16px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.lyric-line.active:hover .lyric-share-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lyric-share-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1) !important;
+}

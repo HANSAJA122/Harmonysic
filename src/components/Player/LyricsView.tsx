@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchLyrics, LyricLine } from '@/lib/lyrics';
-import { Mic2, AlertCircle } from 'lucide-react';
+import { Mic2, AlertCircle, Share2, Download } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import './LyricsView.css';
 
 export const LyricsView: React.FC = () => {
@@ -18,9 +19,47 @@ export const LyricsView: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lyricsWrapperRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
+  const shareCardRef = useRef<HTMLDivElement>(null);
   
   const isUserScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [isGeneratingCard, setIsGeneratingCard] = useState(false);
+  const [lyricToShare, setLyricToShare] = useState<string | null>(null);
+
+  const handleShare = async (e: React.MouseEvent, text: string) => {
+    e.stopPropagation(); // Don't trigger the click-to-seek
+    if (!shareCardRef.current || !currentTrack) return;
+    
+    setLyricToShare(text);
+    setIsGeneratingCard(true);
+
+    try {
+      // Need a tiny timeout to allow React to render the lyricToShare into the hidden card before capturing
+      setTimeout(async () => {
+        if (!shareCardRef.current) return;
+        
+        const dataUrl = await toPng(shareCardRef.current, { 
+          quality: 1, 
+          pixelRatio: 3, // High-res export
+          cacheBust: true,
+        });
+        
+        // Trigger download
+        const link = document.createElement('a');
+        link.download = `${currentTrack.title}_lyric_card.png`;
+        link.href = dataUrl;
+        link.click();
+        
+        setIsGeneratingCard(false);
+        setLyricToShare(null);
+      }, 100);
+    } catch (err) {
+      console.error('Failed to generate lyric card', err);
+      setIsGeneratingCard(false);
+      setLyricToShare(null);
+    }
+  };
 
   // Fetch lyrics when track changes
   useEffect(() => {
@@ -155,12 +194,61 @@ export const LyricsView: React.FC = () => {
                   onClick={() => handleSeek(line.time)}
                   className={`lyric-line ${isActive ? 'active' : ''}`}
                 >
-                  {line.text || '♪'}
+                  <span className="lyric-text">{line.text || '♪'}</span>
+                  {isActive && line.text && (
+                    <button 
+                      className="lyric-share-btn"
+                      onClick={(e) => handleShare(e, line.text)}
+                      title="Share Lyric Card"
+                    >
+                      <Share2 size={16} />
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
         ) : null}
+      </div>
+
+      {/* Hidden Card for generating image exports */}
+      <div 
+        ref={shareCardRef} 
+        style={{
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          width: '600px',
+          height: '600px',
+          background: `radial-gradient(circle at center, var(--dynamic-theme-color, #1db954) 0%, #121212 100%)`,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: '40px',
+          color: 'white',
+          fontFamily: 'system-ui, sans-serif',
+          borderRadius: '24px',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+           <h1 style={{ fontSize: '36px', fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.02em', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
+             "{lyricToShare}"
+           </h1>
+        </div>
+        
+        {currentTrack && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: 'auto', background: 'rgba(0,0,0,0.4)', padding: '16px', borderRadius: '16px', backdropFilter: 'blur(10px)' }}>
+            <img src={currentTrack.albumUrl} alt="" style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
+            <div>
+              <div style={{ fontSize: '20px', fontWeight: 700 }}>{currentTrack.title}</div>
+              <div style={{ fontSize: '16px', opacity: 0.8 }}>{currentTrack.artist}</div>
+            </div>
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.6, fontWeight: 700, fontSize: '14px' }}>
+               <Mic2 size={16} /> HARMONYSIC
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
