@@ -57,6 +57,8 @@ interface PlayerState {
   createPlaylist: (name: string) => Promise<void>;
   addSongToPlaylist: (playlistId: string, track: Track) => Promise<void>;
   removeSongFromPlaylist: (playlistId: string, trackId: string) => Promise<void>;
+  updatePlaylistImage: (playlistId: string, imageUrl: string) => Promise<void>;
+  reorderUserPlaylistTracks: (playlistId: string, fromIndex: number, toIndex: number) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -301,6 +303,41 @@ export const usePlayerStore = create<PlayerState>()(
       return { userPlaylists: updatedPlaylists };
     });
   },
+
+  updatePlaylistImage: async (playlistId, imageUrl) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    
+    set((state) => {
+      const updatedPlaylists = state.userPlaylists.map(p => 
+        p.id === playlistId ? { ...p, imageUrl } : p
+      );
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { userPlaylists: updatedPlaylists }, { merge: true });
+      return { userPlaylists: updatedPlaylists };
+    });
+  },
+
+  reorderUserPlaylistTracks: async (playlistId, fromIndex, toIndex) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    
+    set((state) => {
+      const updatedPlaylists = state.userPlaylists.map(p => {
+        if (p.id === playlistId) {
+          const newTracks = [...p.tracks];
+          const [movedItem] = newTracks.splice(fromIndex, 1);
+          newTracks.splice(toIndex, 0, movedItem);
+          return { ...p, tracks: newTracks };
+        }
+        return p;
+      });
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, { userPlaylists: updatedPlaylists }, { merge: true });
+      return { userPlaylists: updatedPlaylists };
+    });
+  },
+  
   
   toggleSavePlaylist: (playlist) => {
     const { user, openLoginModal } = useAuthStore.getState();
