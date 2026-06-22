@@ -30,6 +30,8 @@ const RightSidebar: React.FC = () => {
         }
       });
       setFriends(usersData);
+    }, (error) => {
+      console.error("Error fetching friends:", error);
     });
     return () => unsubscribe();
   }, [user]);
