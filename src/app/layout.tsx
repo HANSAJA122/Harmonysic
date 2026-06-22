@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: 'Harmonysic',
   description: 'Premium AI music streaming application',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.jpeg',
+    apple: '/logo.jpeg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
