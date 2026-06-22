@@ -118,6 +118,7 @@ const Topbar: React.FC = () => {
               className="topbar-profile-btn" 
               style={{ padding: 0, overflow: 'hidden' }}
               title={user.displayName || 'User Profile'}
+              onClick={() => router.push('/profile')}
             >
               {user.photoURL ? (
                 <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

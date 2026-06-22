@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
+import { Home, Search, Library, PlusSquare, Heart, User } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import './Sidebar.css';
 
@@ -24,6 +24,10 @@ const Sidebar: React.FC = () => {
         <Link href="/library" className={`sidebar-nav-item ${pathname === '/library' ? 'active' : ''}`} style={{ padding: '0 8px', gap: '16px' }}>
           <Library size={24} />
           <span>Your Library</span>
+        </Link>
+        <Link href="/profile" className={`sidebar-nav-item ${pathname === '/profile' ? 'active' : ''}`} style={{ padding: '0 8px', gap: '16px' }}>
+          <User size={24} />
+          <span>Profile</span>
         </Link>
         <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
           <button className="icon-btn"><PlusSquare size={16} /></button>
