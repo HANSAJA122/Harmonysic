@@ -130,7 +130,7 @@ export const LyricsView: React.FC = () => {
         ref={containerRef}
         onWheel={handleUserInteraction}
         onTouchMove={handleUserInteraction}
-        className="flex-1 overflow-y-auto px-4 md:px-24 hide-scrollbar scroll-smooth"
+        className="flex-1 overflow-y-auto px-6 md:px-16 lg:px-32 hide-scrollbar scroll-smooth"
         style={{
           // Creates a fade effect at the top and bottom of the scrolling container
           maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
@@ -140,34 +140,33 @@ export const LyricsView: React.FC = () => {
         {isLoading ? (
           <div className="h-full flex flex-col items-center justify-center text-secondary">
             <Mic2 size={48} className="animate-pulse mb-4" />
-            <p className="text-xl font-bold">Loading lyrics...</p>
+            <p className="text-xl font-bold tracking-tight">Loading lyrics...</p>
           </div>
         ) : error ? (
           <div className="h-full flex flex-col items-center justify-center text-secondary">
             <AlertCircle size={48} className="mb-4" />
-            <p className="text-xl font-bold">{error}</p>
+            <p className="text-xl font-bold tracking-tight">{error}</p>
           </div>
         ) : lyrics ? (
-          <div ref={lyricsWrapperRef} className="max-w-4xl mx-auto pb-[60vh] pt-[40vh] text-center flex flex-col items-center">
+          <div ref={lyricsWrapperRef} className="max-w-5xl pb-[60vh] pt-[40vh] text-left flex flex-col items-start">
             {lyrics.map((line, i) => {
               const isActive = i === activeLineIndex;
-              const isPast = i < activeLineIndex;
               
-              // Spotify styling rules
-              let textClasses = 'text-white/30';
-              if (isActive) textClasses = 'text-white scale-[1.05]';
-              else if (isPast) textClasses = 'text-white/50';
+              // Styling rules matching the exact photo provided
+              let textClasses = 'text-white/40 hover:text-white/60';
+              if (isActive) textClasses = 'text-white hover:underline';
               
               return (
                 <div 
                   key={i}
                   ref={isActive ? activeLineRef : null}
                   onClick={() => handleSeek(line.time)}
-                  className={`text-3xl md:text-5xl font-bold transition-all duration-500 ease-out cursor-pointer hover:text-white/80 w-full mb-8 ${textClasses}`}
+                  className={`text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter transition-all duration-300 ease-out cursor-pointer w-full mb-6 md:mb-8 ${textClasses}`}
                   style={{ 
-                    lineHeight: '1.4',
-                    transformOrigin: 'center center',
+                    lineHeight: '1.2',
                     filter: isActive ? 'none' : 'blur(0.5px)',
+                    transformOrigin: 'left center',
+                    transform: isActive ? 'scale(1.02)' : 'scale(1)'
                   }}
                 >
                   {line.text || '♪'}
@@ -180,4 +179,5 @@ export const LyricsView: React.FC = () => {
     </div>
   );
 };
+
 
