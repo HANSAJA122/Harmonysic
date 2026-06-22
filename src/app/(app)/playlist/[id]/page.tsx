@@ -59,13 +59,48 @@ const PlaylistPage: React.FC = () => {
     setIsUploading(true);
 
     try {
-      const storageRef = ref(storage, `playlists/${id}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      await updatePlaylistImage(id, url);
+      // Option 2: The Hacker Way - Compress and convert to Base64 to save directly in Firestore
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = async () => {
+          // Compress the image using a canvas
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Get compressed base64 string (0.7 quality jpeg)
+          const base64Url = canvas.toDataURL('image/jpeg', 0.7);
+          
+          // Save directly to the playerStore (which syncs to Firestore)
+          await updatePlaylistImage(id, base64Url);
+          setIsUploading(false);
+        };
+        if (event.target?.result) {
+          img.src = event.target.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
     } catch (err) {
-      console.error('Failed to upload image', err);
-    } finally {
+      console.error('Failed to process image', err);
       setIsUploading(false);
     }
   };
