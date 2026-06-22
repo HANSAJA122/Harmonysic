@@ -1,22 +1,23 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import PlayerStateProvider from '@/components/Player/PlayerStateProvider';
 
 export const metadata: Metadata = {
-  title: 'Harmony Music',
-  description: 'Premium music streaming application',
+  title: 'Harmonysic',
+  description: 'Premium AI music streaming application',
   manifest: '/manifest.json',
-  themeColor: '#121212',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Harmony Music',
+    title: 'Harmonysic',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#121212',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

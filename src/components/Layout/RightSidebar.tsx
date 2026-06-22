@@ -6,11 +6,13 @@ import { X, Play, GripVertical, Users } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'next/navigation';
 import './RightSidebar.css';
 
 const RightSidebar: React.FC = () => {
   const { currentTrack, queue, currentIndex, isRightSidebarOpen, setRightSidebarOpen, setQueue, reorderQueue } = usePlayerStore();
   const { user } = useAuthStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'now-playing' | 'queue' | 'friends'>('friends');
   const [friends, setFriends] = useState<any[]>([]);
   
@@ -117,7 +119,13 @@ const RightSidebar: React.FC = () => {
              </div>
           )}
           {friends.map(friend => (
-            <div key={friend.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div 
+              key={friend.id} 
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', transition: 'opacity 0.2s' }}
+              onClick={() => router.push(`/profile/${friend.id}`)}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
               <div style={{ position: 'relative' }}>
                 <img src={friend.photoURL || `https://ui-avatars.com/api/?name=${friend.displayName || 'User'}&background=random`} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                 {friend.currentlyPlaying?.isPlaying && (
@@ -127,7 +135,9 @@ const RightSidebar: React.FC = () => {
                 )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px', color: 'white' }}>{friend.displayName || 'Anonymous User'}</div>
+                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px', color: 'white', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); router.push(`/profile/${friend.id}`); }}>
+                  {friend.displayName || 'Anonymous User'}
+                </div>
                 {friend.currentlyPlaying ? (
                    <div>
                      <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
