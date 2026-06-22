@@ -215,12 +215,14 @@ export const LyricsView: React.FC = () => {
       <div 
         ref={shareCardRef} 
         style={{
-          position: 'absolute',
-          top: '-9999px',
-          left: '-9999px',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: -9999,
+          opacity: 0,
           width: '600px',
           height: '600px',
-          background: `radial-gradient(circle at center, var(--dynamic-theme-color, #1db954) 0%, #121212 100%)`,
+          background: `radial-gradient(circle at center, ${typeof document !== 'undefined' ? document.documentElement.style.getPropertyValue('--dynamic-theme-color') || '#1db954' : '#1db954'} 0%, #121212 100%)`,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -239,7 +241,7 @@ export const LyricsView: React.FC = () => {
         
         {currentTrack && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: 'auto', background: 'rgba(0,0,0,0.4)', padding: '16px', borderRadius: '16px', backdropFilter: 'blur(10px)' }}>
-            <img src={currentTrack.albumUrl} alt="" style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
+            <img src={currentTrack.albumUrl} crossOrigin="anonymous" alt="" style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
             <div>
               <div style={{ fontSize: '20px', fontWeight: 700 }}>{currentTrack.title}</div>
               <div style={{ fontSize: '16px', opacity: 0.8 }}>{currentTrack.artist}</div>
