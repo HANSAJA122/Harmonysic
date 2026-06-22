@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, Heart, PlaySquare, Mic2, PictureInPicture } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { FastAverageColor } from 'fast-average-color';
 import './MusicPlayer.css';
@@ -9,7 +9,7 @@ import './MusicPlayer.css';
 const MusicPlayer: React.FC = () => {
   const { 
     currentTrack, isPlaying, togglePlayPause, setIsPlaying, setFullScreen, 
-    progress, setProgress, volume, 
+    progress, setProgress, volume, setVolume,
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
     setCurrentTrackDuration, setYoutubePlayer,
     isRightSidebarOpen, setRightSidebarOpen,
@@ -20,12 +20,52 @@ const MusicPlayer: React.FC = () => {
   const isCurrentTrackLiked = currentTrack ? likedSongs.some(s => s.id === currentTrack.id) : false;
   
   const ytPlayerRef = useRef<any>(null);
+  const pipVideoRef = useRef<HTMLVideoElement>(null);
+  const pipCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const startPiP = async () => {
+    if (!currentTrack || !pipVideoRef.current || !pipCanvasRef.current) return;
+    
+    try {
+      const video = pipVideoRef.current;
+      const canvas = pipCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = currentTrack.albumUrl;
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+
+      canvas.width = img.width || 500;
+      canvas.height = img.height || 500;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const stream = canvas.captureStream(30);
+      video.srcObject = stream;
+      await video.play();
+
+      await video.requestPictureInPicture();
+    } catch (err) {
+      console.error('Failed to enter PiP mode', err);
+    }
+  };
+
+  useEffect(() => {
+    if (document.pictureInPictureElement === pipVideoRef.current && currentTrack) {
+      startPiP();
+    }
+  }, [currentTrack]);
 
   // Set up progress polling
   useEffect(() => {
@@ -59,10 +99,6 @@ const MusicPlayer: React.FC = () => {
   // Deep diagnostic logging whenever track changes, AND Media Session update
   useEffect(() => {
     if (currentTrack) {
-      console.log('=== DEEP DIAGNOSTIC LOG ===');
-      console.log('1. Selected Track Object:', currentTrack);
-      console.log('2. Extracted videoId:', currentTrack.id);
-      
       // Setup Media Session API for OS integration
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -103,8 +139,7 @@ const MusicPlayer: React.FC = () => {
         fac.getColorAsync(currentTrack.albumUrl, { crossOrigin: 'anonymous' })
           .then(color => {
             document.documentElement.style.setProperty('--dynamic-theme-color', color.hex);
-            // Optionally set a slightly darker version for backgrounds
-            document.documentElement.style.setProperty('--dynamic-theme-color-dark', color.hex + '40'); // 25% opacity hex
+            document.documentElement.style.setProperty('--dynamic-theme-color-dark', color.hex + '40');
           })
           .catch(e => {
             console.warn('Failed to extract color:', e);
@@ -112,13 +147,6 @@ const MusicPlayer: React.FC = () => {
             document.documentElement.style.removeProperty('--dynamic-theme-color-dark');
           });
       }
-
-      setTimeout(() => {
-        const iframe = document.querySelector('iframe');
-        if (iframe) {
-          console.log('5. Found Iframe in DOM');
-        }
-      }, 1000);
     }
   }, [currentTrack]);
 
@@ -148,17 +176,14 @@ const MusicPlayer: React.FC = () => {
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVol = parseFloat(e.target.value);
-    usePlayerStore.setState({ volume: newVol });
+    setVolume(newVol);
   };
 
   const progressPercent = currentTrack && currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0;
   
-  // Use a fallback valid URL to pre-initialize the iframe API safely
-  // IMPORTANT: Keep this static so react-youtube NEVER rebuilds the iframe!
   const [initialVideoId] = useState('dQw4w9WgXcQ');
 
   const onReady = (event: any) => {
-    console.log('[YouTube API] onReady fired!');
     ytPlayerRef.current = event.target;
     setPlayerReady(true);
     setYoutubePlayer(event.target);
@@ -175,42 +200,30 @@ const MusicPlayer: React.FC = () => {
   };
 
   const onStateChange = (event: any) => {
-    console.log('[YouTube API] State changed to:', event.data);
-    // 1 = PLAYING
     if (event.data === 1) {
       setIsPlaying(true);
       const duration = event.target.getDuration();
-      console.log('[YouTube API] onDuration fired:', duration);
       setCurrentTrackDuration(duration);
     }
-    // 2 = PAUSED
     if (event.data === 2) {
       setIsPlaying(false);
     }
-    // 0 = ENDED
     if (event.data === 0) {
       playNext();
     }
   };
 
   const onError = (event: any) => {
-    console.error('[YouTube API] onError fired with code:', event.data);
-    console.log('Error codes: 150/101 = Copyright Block. 2 = Invalid ID.');
     setIsPlaying(false);
-    
-    // Automatically skip to the next track if this one fails to play
-    console.log('Skipping to next track due to playback error...');
     playNext();
   };
 
-  // We still keep the useEffect to sync from external changes, but we shouldn't rely solely on it for clicks
   useEffect(() => {
     if (playerReady && ytPlayerRef.current) {
       try {
         const iframe = ytPlayerRef.current.getIframe();
         if (!iframe || !document.body.contains(iframe)) return;
 
-        // If isPlaying is true but player state is not 1 (PLAYING), try to play
         const state = ytPlayerRef.current.getPlayerState();
         if (isPlaying && state !== 1) {
           ytPlayerRef.current.playVideo();
@@ -223,11 +236,9 @@ const MusicPlayer: React.FC = () => {
     }
   }, [isPlaying, playerReady]);
 
-  // Sync track changes manually without triggering react-youtube prop changes
   useEffect(() => {
     if (playerReady && ytPlayerRef.current && currentTrack) {
       try {
-        console.log('[Sync] Loading new video from effect:', currentTrack.id);
         ytPlayerRef.current.loadVideoById(currentTrack.id);
         if (isPlaying) {
           ytPlayerRef.current.playVideo();
@@ -238,10 +249,8 @@ const MusicPlayer: React.FC = () => {
     }
   }, [currentTrack?.id]);
 
-  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       switch(e.code) {
@@ -270,18 +279,13 @@ const MusicPlayer: React.FC = () => {
 
   const handlePlayPauseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Optimistically toggle state
     togglePlayPause();
     
-    // Synchronously command YouTube API to bypass Safari gesture blocks
     if (ytPlayerRef.current && playerReady) {
       try {
         if (!isPlaying) {
-          console.log('[Direct Click] Forcing playVideo()');
           ytPlayerRef.current.playVideo();
         } else {
-          console.log('[Direct Click] Forcing pauseVideo()');
           ytPlayerRef.current.pauseVideo();
         }
       } catch (err) {
@@ -292,7 +296,6 @@ const MusicPlayer: React.FC = () => {
 
   return (
     <>
-      {/* Hidden YouTube Iframe - MUST stay in DOM and have size to bypass browser throttling! */}
       {isClient && (
         <div style={{ position: 'fixed', top: '10px', left: '10px', width: '300px', height: '200px', opacity: 0.001, pointerEvents: 'none', zIndex: -50 }}>
           <YouTube 
@@ -378,6 +381,13 @@ const MusicPlayer: React.FC = () => {
             </button>
             <button 
               className="player-control-btn" 
+              onClick={startPiP}
+              title="Picture-in-Picture"
+            >
+              <PictureInPicture size={16} />
+            </button>
+            <button 
+              className="player-control-btn" 
               onClick={() => setRightSidebarOpen(!isRightSidebarOpen)}
               style={{ color: isRightSidebarOpen ? 'var(--color-primary)' : 'inherit' }}
               title="Queue"
@@ -413,6 +423,8 @@ const MusicPlayer: React.FC = () => {
           </div>
         </div>
       )}
+      <canvas ref={pipCanvasRef} style={{ display: 'none' }} />
+      <video ref={pipVideoRef} muted playsInline style={{ display: 'none' }} />
     </>
   );
 };
