@@ -73,6 +73,8 @@ interface PlayerState {
   removeSongFromPlaylist: (playlistId: string, trackId: string) => Promise<void>;
   updatePlaylistImage: (playlistId: string, imageUrl: string) => Promise<void>;
   reorderUserPlaylistTracks: (playlistId: string, fromIndex: number, toIndex: number) => Promise<void>;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -94,9 +96,12 @@ export const usePlayerStore = create<PlayerState>()(
   userPlaylists: [],
   recentlyPlayed: [],
   guestPlayCount: 0,
+  theme: 'dark',
   youtubePlayer: null,
   setYoutubePlayer: (player) => set({ youtubePlayer: player }),
   
+  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+
   setCurrentTrack: (track) => set((state) => {
     // Add to recently played (keep last 20)
     const newRecentlyPlayed = [track, ...state.recentlyPlayed.filter(t => t.id !== track.id)].slice(0, 20);
@@ -435,7 +440,8 @@ export const usePlayerStore = create<PlayerState>()(
     volume: state.volume,
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,
-    guestPlayCount: state.guestPlayCount
+    guestPlayCount: state.guestPlayCount,
+    theme: state.theme
   }),
 }
 ));

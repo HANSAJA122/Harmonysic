@@ -5,8 +5,13 @@ import { usePlayerStore } from '@/store/playerStore';
 import { LyricsView } from '@/components/Player/LyricsView';
 
 export const MainContentWrapper: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { isLyricsOpen } = usePlayerStore();
+  const { isLyricsOpen, theme } = usePlayerStore();
   
+  // Apply theme to document
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   // When lyrics are open, the background matches the dynamic album art color
   const bgStyle = isLyricsOpen 
     ? { background: 'linear-gradient(to bottom, var(--dynamic-theme-color-dark, var(--color-surface)), #000000)' } 

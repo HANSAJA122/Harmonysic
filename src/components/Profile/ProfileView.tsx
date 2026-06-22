@@ -3,12 +3,12 @@
 import React, { useMemo } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useAuthStore } from '@/store/authStore';
-import { Clock, Heart, PlayCircle, User } from 'lucide-react';
+import { Clock, Heart, PlayCircle, User, Sun, Moon } from 'lucide-react';
 import './ProfileView.css';
 
 export default function ProfileView() {
   const { user } = useAuthStore();
-  const { likedSongs, recentlyPlayed, setQueue } = usePlayerStore();
+  const { likedSongs, recentlyPlayed, setQueue, theme, toggleTheme } = usePlayerStore();
 
   // Aggregate stats
   const stats = useMemo(() => {
@@ -158,6 +158,39 @@ export default function ProfileView() {
             ) : (
               <div className="empty-state">No tracks found yet. Start listening!</div>
             )}
+          </div>
+        </div>
+
+        {/* Settings */}
+        <div className="profile-section mt-8">
+          <h2 className="section-title">Preferences</h2>
+          <div className="settings-list" style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+            <div className="setting-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-surface)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {theme === 'dark' ? <Moon size={24} color="var(--color-primary)" /> : <Sun size={24} color="var(--color-primary)" />}
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '4px' }}>App Theme</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Toggle between Light and Dark mode.</p>
+                </div>
+              </div>
+              <button 
+                onClick={toggleTheme}
+                style={{
+                  background: 'var(--color-primary)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: 'var(--radius-full)',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                {theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
