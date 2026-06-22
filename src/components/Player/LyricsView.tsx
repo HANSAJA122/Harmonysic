@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { fetchLyrics, LyricLine } from '@/lib/lyrics';
 import { Mic2, AlertCircle } from 'lucide-react';
+import './LyricsView.css';
 
 export const LyricsView: React.FC = () => {
   const currentTrack = usePlayerStore(state => state.currentTrack);
@@ -125,49 +126,34 @@ export const LyricsView: React.FC = () => {
   if (!isLyricsOpen) return null;
 
   return (
-    <div className="flex flex-col h-full w-full relative animate-fade-in select-none">
+    <div className="lyrics-container">
       <div 
         ref={containerRef}
         onWheel={handleUserInteraction}
         onTouchMove={handleUserInteraction}
-        className="flex-1 overflow-y-auto px-6 md:px-16 lg:px-32 hide-scrollbar scroll-smooth"
-        style={{
-          // Creates a fade effect at the top and bottom of the scrolling container
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)'
-        }}
+        className="lyrics-scroll-area"
       >
         {isLoading ? (
-          <div className="h-full flex flex-col items-center justify-center text-secondary">
+          <div className="lyrics-message">
             <Mic2 size={48} className="animate-pulse mb-4" />
-            <p className="text-xl font-bold tracking-tight">Loading lyrics...</p>
+            <p className="lyrics-message-text">Loading lyrics...</p>
           </div>
         ) : error ? (
-          <div className="h-full flex flex-col items-center justify-center text-secondary">
+          <div className="lyrics-message">
             <AlertCircle size={48} className="mb-4" />
-            <p className="text-xl font-bold tracking-tight">{error}</p>
+            <p className="lyrics-message-text">{error}</p>
           </div>
         ) : lyrics ? (
-          <div ref={lyricsWrapperRef} className="max-w-5xl pb-[60vh] pt-[40vh] text-left flex flex-col items-start">
+          <div ref={lyricsWrapperRef} className="lyrics-wrapper">
             {lyrics.map((line, i) => {
               const isActive = i === activeLineIndex;
-              
-              // Styling rules matching the exact photo provided
-              let textClasses = 'text-white/40 hover:text-white/60';
-              if (isActive) textClasses = 'text-white hover:underline';
               
               return (
                 <div 
                   key={i}
                   ref={isActive ? activeLineRef : null}
                   onClick={() => handleSeek(line.time)}
-                  className={`text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter transition-all duration-300 ease-out cursor-pointer w-full mb-6 md:mb-8 ${textClasses}`}
-                  style={{ 
-                    lineHeight: '1.2',
-                    filter: isActive ? 'none' : 'blur(0.5px)',
-                    transformOrigin: 'left center',
-                    transform: isActive ? 'scale(1.02)' : 'scale(1)'
-                  }}
+                  className={`lyric-line ${isActive ? 'active' : ''}`}
                 >
                   {line.text || '♪'}
                 </div>
