@@ -4,13 +4,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-background);
-  z-index: var(--z-modal);
+  background: rgba(20, 18, 19, 0.85); /* Dark frosted background */
+  backdrop-filter: blur(60px);
+  -webkit-backdrop-filter: blur(60px);
+  z-index: 9999; /* Ensure it is above absolutely everything */
   display: flex;
   flex-direction: column;
   padding: var(--spacing-4);
-  /* Apply a slight gradient based on primary color */
-  background: linear-gradient(180deg, rgba(29, 185, 84, 0.2) 0%, var(--color-background) 100%);
 }
 
 .fs-header {
