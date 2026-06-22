@@ -30,41 +30,38 @@ const MusicPlayer: React.FC = () => {
   }, []);
 
   const startPiP = async () => {
-    if (!currentTrack || !pipVideoRef.current || !pipCanvasRef.current) return;
-    
+    if (!pipVideoRef.current || !pipCanvasRef.current) return;
     try {
       const video = pipVideoRef.current;
       const canvas = pipCanvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = currentTrack.albumUrl;
-      
-      await new Promise((resolve) => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
-
-      canvas.width = img.width || 500;
-      canvas.height = img.height || 500;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
       const stream = canvas.captureStream(30);
       video.srcObject = stream;
       await video.play();
-
       await video.requestPictureInPicture();
     } catch (err) {
       console.error('Failed to enter PiP mode', err);
+      alert('Picture-in-Picture failed. Ensure you have interacted with the page first.');
     }
   };
 
+  // Pre-draw album art to canvas whenever track changes
   useEffect(() => {
-    if (document.pictureInPictureElement === pipVideoRef.current && currentTrack) {
-      startPiP();
-    }
+    if (!currentTrack || !pipCanvasRef.current) return;
+    const canvas = pipCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = currentTrack.albumUrl;
+    
+    img.onload = () => {
+      canvas.width = img.width || 500;
+      canvas.height = img.height || 500;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // If already in PiP, this will seamlessly update the floating window!
+    };
   }, [currentTrack]);
 
   // Set up progress polling
