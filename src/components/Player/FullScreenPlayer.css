@@ -4,15 +4,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(10, 8, 9, 0.95); /* Extremely dark, almost opaque */
+  background: rgba(10, 8, 9, 0.45); /* Glassy frosted background */
   backdrop-filter: blur(80px);
   -webkit-backdrop-filter: blur(80px);
   z-index: 9999; /* Ensure it is above absolutely everything */
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--spacing-8);
-  overflow-y: auto;
+  padding: 4vh var(--spacing-8);
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent scrollbar */
 }
 
 .fs-content-wrapper {
@@ -27,7 +28,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-8);
+  margin-bottom: 3vh;
   width: 100%;
 }
 
@@ -44,13 +45,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-8);
+  margin-bottom: 4vh;
   width: 100%;
+  min-height: 0; /* Important to allow scaling down */
 }
 
 .fs-artwork {
-  width: 100%;
-  max-width: 450px;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 450px;
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-xl);
   object-fit: cover;
@@ -61,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-6);
+  margin-bottom: 3vh;
   width: 100%;
 }
 
@@ -78,7 +82,7 @@
 }
 
 .fs-progress {
-  margin-bottom: var(--spacing-6);
+  margin-bottom: 3vh;
   width: 100%;
 }
 
@@ -109,9 +113,9 @@
 .fs-controls {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center the buttons instead of spreading them */
+  justify-content: center;
   gap: 32px;
-  margin-bottom: var(--spacing-8);
+  margin-bottom: 4vh;
   width: 100%;
 }
 

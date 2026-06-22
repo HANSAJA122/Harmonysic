@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic } from 'lucide-react';
+import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import AddToPlaylistModal from '../UI/AddToPlaylistModal';
 import './FullScreenPlayer.css';
@@ -9,7 +9,7 @@ const FullScreenPlayer: React.FC = () => {
   const { 
     currentTrack, isPlaying, togglePlayPause, setFullScreen, progress, isFullScreen,
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
-    likedSongs, toggleLikeSong
+    likedSongs, toggleLikeSong, isLyricsOpen, setLyricsOpen
   } = usePlayerStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
@@ -87,6 +87,13 @@ const FullScreenPlayer: React.FC = () => {
 
         <div className="fs-bottom-actions">
           <button className="player-control-btn"><MonitorSpeaker size={24} /></button>
+          <button 
+            className="player-control-btn" 
+            onClick={() => setLyricsOpen(!isLyricsOpen)}
+            style={{ color: isLyricsOpen ? 'var(--color-primary)' : 'inherit' }}
+          >
+            <Mic2 size={24} />
+          </button>
           <button className="player-control-btn"><ListMusic size={24} /></button>
         </div>
       </div>
