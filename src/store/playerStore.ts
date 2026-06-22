@@ -42,6 +42,7 @@ interface PlayerState {
   setProgress: (progress: number) => void;
   addToQueue: (track: Track) => void;
   setQueue: (tracks: Track[], startIndex?: number) => void;
+  reorderQueue: (fromIndex: number, toIndex: number) => void;
   playNext: () => void;
   playPrevious: () => void;
   toggleShuffle: () => void;
@@ -103,6 +104,24 @@ export const usePlayerStore = create<PlayerState>()(
   setVolume: (volume) => set({ volume }),
   setProgress: (progress) => set({ progress }),
   addToQueue: (track) => set((state) => ({ queue: [...state.queue, track] })),
+  
+  reorderQueue: (fromIndex, toIndex) => set((state) => {
+    const newQueue = [...state.queue];
+    const [movedItem] = newQueue.splice(fromIndex, 1);
+    newQueue.splice(toIndex, 0, movedItem);
+    
+    // Adjust currentIndex if necessary so the currently playing song doesn't change
+    let newCurrentIndex = state.currentIndex;
+    if (fromIndex === state.currentIndex) {
+      newCurrentIndex = toIndex;
+    } else if (fromIndex < state.currentIndex && toIndex >= state.currentIndex) {
+      newCurrentIndex--;
+    } else if (fromIndex > state.currentIndex && toIndex <= state.currentIndex) {
+      newCurrentIndex++;
+    }
+    
+    return { queue: newQueue, currentIndex: newCurrentIndex };
+  }),
   
   setQueue: (tracks, startIndex = 0) => {
     if (tracks.length === 0) return;

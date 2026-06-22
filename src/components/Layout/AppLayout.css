@@ -5,6 +5,23 @@
   width: 100vw;
   overflow: hidden;
   background-color: var(--color-background);
+  position: relative;
+}
+
+/* Global Spotify-style immersive background glow */
+.app-layout::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: -20%;
+  width: 140%;
+  height: 120%;
+  background: radial-gradient(circle at 40% 20%, var(--dynamic-theme-color-dark, transparent) 0%, transparent 60%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 1.5s ease-in-out;
+  filter: blur(100px);
 }
 
 .app-main-wrapper {
@@ -12,6 +29,7 @@
   flex: 1;
   overflow: hidden;
   padding: 0;
+  z-index: 1;
 }
 
 .app-main {
@@ -20,22 +38,7 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  background-color: var(--color-background);
-  transition: background-color 1s ease;
-}
-
-.app-main::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 330px;
-  background: linear-gradient(to bottom, var(--dynamic-theme-color-dark, transparent), transparent);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
-  transition: background 1s ease;
+  background-color: transparent;
 }
 
 @media (min-width: 768px) {

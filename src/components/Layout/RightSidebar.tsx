@@ -1,17 +1,62 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
-import { X, MoreHorizontal, Play } from 'lucide-react';
+import { X, MoreHorizontal, Play, GripVertical } from 'lucide-react';
 import './RightSidebar.css';
 
 const RightSidebar: React.FC = () => {
-  const { currentTrack, queue, currentIndex, isRightSidebarOpen, setRightSidebarOpen, setQueue } = usePlayerStore();
+  const { currentTrack, queue, currentIndex, isRightSidebarOpen, setRightSidebarOpen, setQueue, reorderQueue } = usePlayerStore();
   const [activeTab, setActiveTab] = useState<'now-playing' | 'queue'>('queue');
+  
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   if (!currentTrack || !isRightSidebarOpen) return null;
 
   const upNextTracks = queue.slice(currentIndex + 1);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    // Small delay to prevent the dragged element from immediately hiding if we do styling
+    setTimeout(() => {
+      const el = e.target as HTMLElement;
+      if (el) el.classList.add('dragging');
+    }, 0);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    const el = e.target as HTMLElement;
+    if (el) el.classList.remove('dragging');
+  };
+
+  const handleDrop = (e: React.DragEvent, dropTargetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== dropTargetIndex) {
+      // Map local upNext index to global queue index
+      const globalFrom = currentIndex + 1 + draggedIndex;
+      const globalTo = currentIndex + 1 + dropTargetIndex;
+      reorderQueue(globalFrom, globalTo);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
 
   return (
     <aside className="right-sidebar">
@@ -82,15 +127,24 @@ const RightSidebar: React.FC = () => {
                   return (
                     <div 
                       key={`${track.id}-${i}`} 
-                      className="queue-item"
-                      onClick={() => setQueue(queue, absoluteIndex)}
+                      className={`queue-item draggable-item ${dragOverIndex === i ? (draggedIndex! < i ? 'drop-below' : 'drop-above') : ''} ${draggedIndex === i ? 'is-dragging' : ''}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, i)}
+                      onDragOver={(e) => handleDragOver(e, i)}
+                      onDragLeave={handleDragLeave}
+                      onDragEnd={handleDragEnd}
+                      onDrop={(e) => handleDrop(e, i)}
+                      onDoubleClick={() => setQueue(queue, absoluteIndex)}
                     >
+                      <div className="drag-handle">
+                        <GripVertical size={16} color="var(--color-text-secondary)" />
+                      </div>
                       <img src={track.albumUrl} alt={track.title} className="queue-item-img" />
                       <div className="queue-item-info">
                         <div className="queue-item-title">{track.title}</div>
                         <div className="queue-item-artist">{track.artist}</div>
                       </div>
-                      <div className="queue-item-action">
+                      <div className="queue-item-action" onClick={() => setQueue(queue, absoluteIndex)}>
                         <Play size={16} fill="currentColor" />
                       </div>
                     </div>
