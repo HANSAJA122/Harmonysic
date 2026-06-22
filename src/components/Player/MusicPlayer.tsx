@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { Play, Pause, SkipBack, SkipForward, Maximize2, Mic2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Maximize2, Mic2, Heart } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useAuthStore } from '@/store/authStore';
 import { db } from '@/lib/firebase';
@@ -16,7 +16,8 @@ const MusicPlayer: React.FC = () => {
     playNext, playPrevious,
     setCurrentTrackDuration, setYoutubePlayer,
     isRightSidebarOpen, setRightSidebarOpen,
-    isLyricsOpen, setLyricsOpen
+    isLyricsOpen, setLyricsOpen,
+    likedSongs, toggleLikeSong
   } = usePlayerStore();
   
   const { user } = useAuthStore();
@@ -354,6 +355,14 @@ const MusicPlayer: React.FC = () => {
               </button>
 
               <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }}></div>
+
+              <button 
+                className="player-control-btn" 
+                onClick={(e) => { e.stopPropagation(); toggleLikeSong(displayTrack); }}
+                style={{ color: likedSongs.some(s => s.id === displayTrack.id) ? 'var(--color-primary)' : 'inherit' }}
+              >
+                <Heart size={18} fill={likedSongs.some(s => s.id === displayTrack.id) ? "currentColor" : "none"} />
+              </button>
 
               <button 
                 className="player-control-btn" 
