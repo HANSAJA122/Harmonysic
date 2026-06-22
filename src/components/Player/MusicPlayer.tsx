@@ -56,13 +56,47 @@ const MusicPlayer: React.FC = () => {
     }
   }, [volume, playerReady]);
 
-  // Deep diagnostic logging whenever track changes
+  // Deep diagnostic logging whenever track changes, AND Media Session update
   useEffect(() => {
     if (currentTrack) {
       console.log('=== DEEP DIAGNOSTIC LOG ===');
       console.log('1. Selected Track Object:', currentTrack);
       console.log('2. Extracted videoId:', currentTrack.id);
       
+      // Setup Media Session API for OS integration
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentTrack.title,
+          artist: currentTrack.artist,
+          album: 'Harmonysic',
+          artwork: [
+            { src: currentTrack.albumUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: currentTrack.albumUrl, sizes: '128x128', type: 'image/jpeg' },
+            { src: currentTrack.albumUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: currentTrack.albumUrl, sizes: '256x256', type: 'image/jpeg' },
+            { src: currentTrack.albumUrl, sizes: '384x384', type: 'image/jpeg' },
+            { src: currentTrack.albumUrl, sizes: '512x512', type: 'image/jpeg' },
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          togglePlayPause();
+          if (ytPlayerRef.current && playerReady) ytPlayerRef.current.playVideo();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          togglePlayPause();
+          if (ytPlayerRef.current && playerReady) ytPlayerRef.current.pauseVideo();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrevious());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          if (details.seekTime && ytPlayerRef.current && playerReady) {
+            ytPlayerRef.current.seekTo(details.seekTime, true);
+            setProgress(details.seekTime);
+          }
+        });
+      }
+
       // Extract Dynamic Color
       if (currentTrack.albumUrl) {
         const fac = new FastAverageColor();
@@ -203,6 +237,36 @@ const MusicPlayer: React.FC = () => {
       }
     }
   }, [currentTrack?.id]);
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input or textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      switch(e.code) {
+        case 'Space':
+          e.preventDefault();
+          togglePlayPause();
+          if (ytPlayerRef.current && playerReady) {
+            if (!isPlaying) ytPlayerRef.current.playVideo();
+            else ytPlayerRef.current.pauseVideo();
+          }
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          playNext();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          playPrevious();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, playerReady, togglePlayPause, playNext, playPrevious]);
 
   const handlePlayPauseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
