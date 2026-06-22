@@ -10,11 +10,18 @@ import './Sidebar.css';
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { likedSongs, savedPlaylists, setQueue } = usePlayerStore();
+  const { likedSongs, savedPlaylists, userPlaylists, setQueue, createPlaylist } = usePlayerStore();
 
   const handlePlayLikedSongs = () => {
     if (likedSongs.length > 0) {
       setQueue(likedSongs, 0);
+    }
+  };
+
+  const handleCreatePlaylist = async () => {
+    const name = prompt("Enter playlist name:");
+    if (name && name.trim().length > 0) {
+      await createPlaylist(name.trim());
     }
   };
 
@@ -30,7 +37,7 @@ const Sidebar: React.FC = () => {
           <span>Profile</span>
         </Link>
         <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
-          <button className="icon-btn"><PlusSquare size={16} /></button>
+          <button className="icon-btn" onClick={handleCreatePlaylist} title="Create Playlist"><PlusSquare size={16} /></button>
         </div>
       </nav>
 
@@ -59,6 +66,28 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
 
+        {/* User Created Playlists */}
+        {userPlaylists.map((playlist) => (
+          <div 
+            key={playlist.id} 
+            className="library-item"
+            onClick={() => router.push(`/playlist/${playlist.id}`)}
+          >
+            {playlist.imageUrl ? (
+              <img src={playlist.imageUrl} className="library-item-img" alt={playlist.title} />
+            ) : (
+              <div className="library-item-icon" style={{ background: '#282828' }}>
+                <span style={{ color: '#b3b3b3' }}>♪</span>
+              </div>
+            )}
+            <div className="library-item-info">
+              <div className="library-item-title">{playlist.title}</div>
+              <div className="library-item-subtitle">Playlist • You</div>
+            </div>
+          </div>
+        ))}
+
+        {/* Saved YouTube Playlists */}
         {savedPlaylists.map((playlist) => (
           <div 
             key={playlist.id} 
