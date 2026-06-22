@@ -9,21 +9,13 @@
   -webkit-backdrop-filter: blur(30px);
   border-radius: 40px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding: 8px;
   z-index: var(--z-player);
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
-}
-
-.music-player-top-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 64px;
 }
 
 @media (max-width: 767px) {
@@ -38,7 +30,6 @@
 
 .music-player:hover, .music-player.expanded {
   width: 450px;
-  height: 120px;
   padding-right: 24px;
 }
 
@@ -151,9 +142,11 @@
   display: flex;
   flex-direction: column;
   margin-left: 12px;
+  margin-right: 16px;
   cursor: pointer;
-  max-width: 110px; /* Strictly prevent overflow */
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .player-title {
@@ -161,7 +154,7 @@
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: 2px;
-  max-width: 100%;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,7 +163,7 @@
 .player-artist {
   font-size: 0.75rem;
   color: var(--color-text-secondary);
-  max-width: 100%;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -181,6 +174,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .player-controls {
@@ -189,28 +184,13 @@
   gap: 12px;
 }
 
-.music-player-bottom-row {
-  width: 100%;
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  transition: all 0.4s ease;
-  padding: 0 8px 0 72px; /* Align with track info */
-  box-sizing: border-box;
-}
-
-.music-player:hover .music-player-bottom-row,
-.music-player.expanded .music-player-bottom-row {
-  opacity: 1;
-  height: 20px;
-  margin-top: 8px;
-}
-
 .mini-progress-container {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
 .mini-time {
