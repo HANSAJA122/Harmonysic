@@ -335,27 +335,28 @@ const MusicPlayer: React.FC = () => {
             </div>
           )}
 
-          <div className="player-vinyl-container" onClick={() => setFullScreen(true)}>
-            <svg className="progress-ring" viewBox="0 0 70 70">
-              <circle className="progress-ring-circle-bg" cx="35" cy="35" r="32"></circle>
-              <circle 
-                className="progress-ring-circle" 
-                cx="35" cy="35" r="32" 
-                style={{'--progress': progressPercent} as React.CSSProperties}
-              ></circle>
-            </svg>
-            <img 
-              src={displayTrack.albumUrl} 
-              alt={displayTrack.title} 
-              className={`player-artwork-vinyl ${isPlaying ? '' : 'paused'}`} 
-            />
-          </div>
-
-          <div className="player-expanded-content">
-            <div className="player-track-info" onClick={() => setFullScreen(true)}>
-              <span className="player-title">{displayTrack.title}</span>
-              <span className="player-artist">{displayTrack.artist}</span>
+          <div className="music-player-top-row">
+            <div className="player-vinyl-container" onClick={() => setFullScreen(true)}>
+              <svg className="progress-ring" viewBox="0 0 70 70">
+                <circle className="progress-ring-circle-bg" cx="35" cy="35" r="32"></circle>
+                <circle 
+                  className="progress-ring-circle" 
+                  cx="35" cy="35" r="32" 
+                  style={{'--progress': progressPercent} as React.CSSProperties}
+                ></circle>
+              </svg>
+              <img 
+                src={displayTrack.albumUrl} 
+                alt={displayTrack.title} 
+                className={`player-artwork-vinyl ${isPlaying ? '' : 'paused'}`} 
+              />
             </div>
+
+            <div className="player-expanded-content">
+              <div className="player-track-info" onClick={() => setFullScreen(true)}>
+                <span className="player-title">{displayTrack.title}</span>
+                <span className="player-artist">{displayTrack.artist}</span>
+              </div>
             
             <div className="player-controls-wrapper">
               <div className="player-controls">
@@ -397,19 +398,22 @@ const MusicPlayer: React.FC = () => {
                   <Maximize2 size={18} />
                 </button>
               </div>
-              <div className="mini-progress-container" onClick={e => e.stopPropagation()}>
-                <span className="mini-time">{formatTime(progress)}</span>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max={displayTrack.duration || 100} 
-                  value={progress} 
-                  onChange={handleSeek}
-                  className="mini-seek-bar"
-                  style={{ background: `linear-gradient(to right, var(--color-primary) ${progressPercent}%, rgba(255,255,255,0.1) ${progressPercent}%)` }}
-                />
-                <span className="mini-time">{formatTime(displayTrack.duration)}</span>
-              </div>
+            </div>
+          </div>
+
+          <div className="music-player-bottom-row" onClick={e => e.stopPropagation()}>
+            <div className="mini-progress-container">
+              <span className="mini-time">{formatTime(progress)}</span>
+              <input 
+                type="range" 
+                min="0" 
+                max={displayTrack.duration || 100} 
+                value={progress} 
+                onChange={handleSeek}
+                className="mini-seek-bar"
+                style={{ background: `linear-gradient(to right, var(--color-primary) ${progressPercent}%, rgba(255,255,255,0.1) ${progressPercent}%)` }}
+              />
+              <span className="mini-time">{formatTime(displayTrack.duration)}</span>
             </div>
           </div>
 
