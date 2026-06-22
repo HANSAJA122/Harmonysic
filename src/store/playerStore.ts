@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useAuthStore } from './authStore';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 export interface Track {
   id: string;
@@ -88,6 +88,24 @@ export const usePlayerStore = create<PlayerState>()(
     const newRecentlyPlayed = [track, ...state.recentlyPlayed.filter(t => t.id !== track.id)].slice(0, 20);
     get().syncRecentlyPlayedToFirebase(newRecentlyPlayed);
     
+    const user = useAuthStore.getState().user;
+    if (user && track) {
+      updateDoc(doc(db, 'users', user.uid), {
+        currentlyPlaying: {
+          trackId: track.id,
+          title: track.title,
+          artist: track.artist,
+          albumUrl: track.albumUrl,
+          isPlaying: true,
+          updatedAt: new Date().toISOString()
+        }
+      }).catch(e => console.warn('Failed to sync track state', e));
+    } else if (user && !track) {
+      updateDoc(doc(db, 'users', user.uid), {
+        currentlyPlaying: null
+      }).catch(e => console.warn('Failed to clear track state', e));
+    }
+    
     return { 
       currentTrack: track, 
       progress: 0, 
@@ -98,8 +116,27 @@ export const usePlayerStore = create<PlayerState>()(
   setCurrentTrackDuration: (duration) => set((state) => ({
     currentTrack: state.currentTrack ? { ...state.currentTrack, duration } : null
   })),
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
-  togglePlayPause: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  setIsPlaying: (isPlaying) => set((state) => {
+    const user = useAuthStore.getState().user;
+    if (user && state.currentTrack) {
+      updateDoc(doc(db, 'users', user.uid), {
+        'currentlyPlaying.isPlaying': isPlaying,
+        'currentlyPlaying.updatedAt': new Date().toISOString()
+      }).catch(e => console.warn('Failed to sync play state', e));
+    }
+    return { isPlaying };
+  }),
+  togglePlayPause: () => set((state) => {
+    const newIsPlaying = !state.isPlaying;
+    const user = useAuthStore.getState().user;
+    if (user && state.currentTrack) {
+      updateDoc(doc(db, 'users', user.uid), {
+        'currentlyPlaying.isPlaying': newIsPlaying,
+        'currentlyPlaying.updatedAt': new Date().toISOString()
+      }).catch(e => console.warn('Failed to sync play state', e));
+    }
+    return { isPlaying: newIsPlaying };
+  }),
   setFullScreen: (isFullScreen) => set({ isFullScreen }),
   setLyricsOpen: (isOpen) => set({ isLyricsOpen: isOpen }),
   setRightSidebarOpen: (isOpen) => set({ isRightSidebarOpen: isOpen }),
