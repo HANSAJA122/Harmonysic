@@ -266,6 +266,22 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const newTime = Number(e.target.value);
+    if (ytPlayerRef.current && playerReady) {
+      ytPlayerRef.current.seekTo(newTime, true);
+      setProgress(newTime);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   return (
     <>
       {isClient && (
@@ -341,44 +357,59 @@ const MusicPlayer: React.FC = () => {
               <span className="player-artist">{displayTrack.artist}</span>
             </div>
             
-            <div className="player-controls">
-              <button className="player-control-btn" onClick={(e) => { e.stopPropagation(); playPrevious(); }}>
-                <SkipBack size={18} fill="currentColor" />
-              </button>
-              
-              <button className="player-play-btn" onClick={handlePlayPauseClick}>
-                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: '2px' }} />}
-              </button>
-              
-              <button className="player-control-btn" onClick={(e) => { e.stopPropagation(); playNext(); }}>
-                <SkipForward size={18} fill="currentColor" />
-              </button>
+            <div className="player-controls-wrapper">
+              <div className="player-controls">
+                <button className="player-control-btn" onClick={(e) => { e.stopPropagation(); playPrevious(); }}>
+                  <SkipBack size={18} fill="currentColor" />
+                </button>
+                
+                <button className="player-play-btn" onClick={handlePlayPauseClick}>
+                  {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: '2px' }} />}
+                </button>
+                
+                <button className="player-control-btn" onClick={(e) => { e.stopPropagation(); playNext(); }}>
+                  <SkipForward size={18} fill="currentColor" />
+                </button>
 
-              <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }}></div>
+                <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }}></div>
 
-              <button 
-                className="player-control-btn" 
-                onClick={(e) => { e.stopPropagation(); toggleLikeSong(displayTrack); }}
-                style={{ color: likedSongs.some(s => s.id === displayTrack.id) ? 'var(--color-primary)' : 'inherit' }}
-              >
-                <Heart size={18} fill={likedSongs.some(s => s.id === displayTrack.id) ? "currentColor" : "none"} />
-              </button>
+                <button 
+                  className="player-control-btn" 
+                  onClick={(e) => { e.stopPropagation(); toggleLikeSong(displayTrack); }}
+                  style={{ color: likedSongs.some(s => s.id === displayTrack.id) ? 'var(--color-primary)' : 'inherit' }}
+                >
+                  <Heart size={18} fill={likedSongs.some(s => s.id === displayTrack.id) ? "currentColor" : "none"} />
+                </button>
 
-              <button 
-                className="player-control-btn" 
-                onClick={(e) => { e.stopPropagation(); setLyricsOpen(!isLyricsOpen); }}
-                style={{ color: isLyricsOpen ? 'var(--color-primary)' : 'inherit' }}
-              >
-                <Mic2 size={18} />
-              </button>
-              
-              <button 
-                className="player-control-btn" 
-                onClick={(e) => { e.stopPropagation(); setRightSidebarOpen(!isRightSidebarOpen); }}
-                style={{ color: isRightSidebarOpen ? 'var(--color-primary)' : 'inherit' }}
-              >
-                <Maximize2 size={18} />
-              </button>
+                <button 
+                  className="player-control-btn" 
+                  onClick={(e) => { e.stopPropagation(); setLyricsOpen(!isLyricsOpen); }}
+                  style={{ color: isLyricsOpen ? 'var(--color-primary)' : 'inherit' }}
+                >
+                  <Mic2 size={18} />
+                </button>
+                
+                <button 
+                  className="player-control-btn" 
+                  onClick={(e) => { e.stopPropagation(); setRightSidebarOpen(!isRightSidebarOpen); }}
+                  style={{ color: isRightSidebarOpen ? 'var(--color-primary)' : 'inherit' }}
+                >
+                  <Maximize2 size={18} />
+                </button>
+              </div>
+              <div className="mini-progress-container" onClick={e => e.stopPropagation()}>
+                <span className="mini-time">{formatTime(progress)}</span>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max={displayTrack.duration || 100} 
+                  value={progress} 
+                  onChange={handleSeek}
+                  className="mini-seek-bar"
+                  style={{ background: `linear-gradient(to right, var(--color-primary) ${progressPercent}%, rgba(255,255,255,0.1) ${progressPercent}%)` }}
+                />
+                <span className="mini-time">{formatTime(displayTrack.duration)}</span>
+              </div>
             </div>
           </div>
 
