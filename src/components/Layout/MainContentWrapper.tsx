@@ -14,8 +14,16 @@ export const MainContentWrapper: React.FC<{children: React.ReactNode}> = ({ chil
 
   return (
     <div 
-      className="flex-1 overflow-hidden relative transition-colors duration-1000 flex flex-col" 
-      style={bgStyle}
+      style={{
+        flex: 1,
+        minHeight: 0,
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'background-color 1s',
+        ...bgStyle
+      }}
     >
       {isLyricsOpen ? (
         <LyricsView />
