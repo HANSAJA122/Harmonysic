@@ -461,14 +461,14 @@ const MusicPlayer: React.FC = () => {
                 <input 
                   type="range" 
                   min="0" 
-                  max={currentTrack.duration || 100} 
+                  max={currentTrack?.duration || 100} 
                   value={progress} 
                   onChange={handleSeek}
                   className="player-progress-slider"
                   style={{ '--progress': `${progressPercent}%` } as any}
                 />
               </div>
-              <span className="player-time">{formatTime(currentTrack.duration)}</span>
+              <span className="player-time">{formatTime(currentTrack?.duration || 0)}</span>
             </div>
           </div>
 
