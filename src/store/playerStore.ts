@@ -61,6 +61,8 @@ interface PlayerState {
   toggleRepeat: () => void;
   toggleLikeSong: (track: Track) => void;
   toggleSavePlaylist: (playlist: any) => void;
+  setSavedPlaylists: (playlists: any[]) => void;
+  syncSavedPlaylistsToFirebase: (playlists: any[]) => Promise<void>;
   setLikedSongs: (songs: Track[]) => void;
   syncLikedSongsToFirebase: (songs: Track[]) => Promise<void>;
   setRecentlyPlayed: (songs: Track[]) => void;
@@ -286,6 +288,19 @@ export const usePlayerStore = create<PlayerState>()(
     }
   },
   
+  setSavedPlaylists: (playlists) => set({ savedPlaylists: playlists }),
+  
+  syncSavedPlaylistsToFirebase: async (playlists) => {
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, { savedPlaylists: playlists }, { merge: true });
+    } catch (error) {
+      console.error('Error syncing saved playlists:', error);
+    }
+  },
+  
   setRecentlyPlayed: (songs) => set({ recentlyPlayed: songs }),
   
   syncRecentlyPlayedToFirebase: async (songs) => {
@@ -400,10 +415,16 @@ export const usePlayerStore = create<PlayerState>()(
 
     set((state) => {
       const isSaved = state.savedPlaylists.some(p => p.id === playlist.id);
+      let newSavedPlaylists;
       if (isSaved) {
-        return { savedPlaylists: state.savedPlaylists.filter(p => p.id !== playlist.id) };
+        newSavedPlaylists = state.savedPlaylists.filter(p => p.id !== playlist.id);
+      } else {
+        newSavedPlaylists = [...state.savedPlaylists, playlist];
       }
-      return { savedPlaylists: [...state.savedPlaylists, playlist] };
+      
+      get().syncSavedPlaylistsToFirebase(newSavedPlaylists);
+      
+      return { savedPlaylists: newSavedPlaylists };
     });
   },
 }),

@@ -42,6 +42,8 @@ export const useAuthStore = create<AuthState>((set) => ({
           
           // First check if it exists, if not create it
           const userSnap = await getDoc(userRef);
+          const currentLocalSavedPlaylists = usePlayerStore.getState().savedPlaylists || [];
+
           if (!userSnap.exists()) {
             await setDoc(userRef, { 
               email: user.email,
@@ -50,8 +52,15 @@ export const useAuthStore = create<AuthState>((set) => ({
               likedSongs: [],
               recentlyPlayed: [],
               userPlaylists: [],
+              savedPlaylists: currentLocalSavedPlaylists,
               createdAt: new Date().toISOString()
             });
+          } else {
+            const data = userSnap.data();
+            // Rescue logic: if local playlists exist but cloud is empty, upload local to cloud
+            if (currentLocalSavedPlaylists.length > 0 && (!data.savedPlaylists || data.savedPlaylists.length === 0)) {
+               await setDoc(userRef, { savedPlaylists: currentLocalSavedPlaylists }, { merge: true });
+            }
           }
           
           // Listen to real-time changes
@@ -67,6 +76,9 @@ export const useAuthStore = create<AuthState>((set) => ({
               if (data.userPlaylists) {
                 usePlayerStore.getState().setUserPlaylists(data.userPlaylists);
               }
+              if (data.savedPlaylists) {
+                usePlayerStore.getState().setSavedPlaylists(data.savedPlaylists);
+              }
             }
           });
           
@@ -78,6 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         usePlayerStore.getState().setLikedSongs([]);
         usePlayerStore.getState().setRecentlyPlayed([]);
         usePlayerStore.getState().setUserPlaylists([]);
+        usePlayerStore.getState().setSavedPlaylists([]);
       }
     });
 
