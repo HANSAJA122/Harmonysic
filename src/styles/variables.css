@@ -1,18 +1,18 @@
 :root {
-  --color-primary: #1ed760;
-  --color-primary-hover: #3be477;
-  --color-secondary: #121212;
-  --color-background: #000000;
-  --color-surface: #121212;
-  --color-surface-elevated: #242424;
-  --color-surface-hover: #1a1a1a;
-  --color-surface-light: #2a2a2a;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #b3b3b3;
-  --color-accent: #3BE477;
-  --color-danger: #e91429;
+  --color-primary: #E27D60;
+  --color-primary-hover: #F5C4A8;
+  --color-secondary: #7C3F3B;
+  --color-background: #141213;
+  --color-surface: #221C1E;
+  --color-surface-elevated: #2A2124;
+  --color-surface-hover: #3B2E31;
+  --color-surface-light: #4A3A3D;
+  --color-text-primary: #F7F3E9;
+  --color-text-secondary: #D4BDB5;
+  --color-accent: #B0485A;
+  --color-danger: #B0485A;
   
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;

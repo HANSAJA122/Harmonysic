@@ -15,11 +15,17 @@ body {
   font-family: var(--font-family);
   background-color: var(--color-background);
   color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden; /* App-like feel, scrollable containers handle overflow */
 }
+
+h1 { font-size: 32px; font-weight: 700; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 500; }
 
 img, picture, video, canvas, svg {
   display: block;
