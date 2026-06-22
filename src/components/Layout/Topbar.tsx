@@ -70,7 +70,7 @@ const Topbar: React.FC = () => {
       <div className="topbar-left">
         <div className="topbar-logo">
           <div style={{ color: 'var(--color-text-primary)' }}>
-            <img src="/icon.svg" alt="Harmonics Audio" width="32" height="32" />
+            <img src="/logo.jpeg" alt="Harmonics Audio" width="32" height="32" style={{ borderRadius: '6px' }} />
           </div>
         </div>
       </div>
