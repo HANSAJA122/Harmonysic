@@ -30,17 +30,46 @@ const MusicPlayer: React.FC = () => {
   }, []);
 
   const startPiP = async () => {
-    if (!pipVideoRef.current || !pipCanvasRef.current) return;
     try {
+      // 1. Try Modern Document Picture-in-Picture API first (Chrome/Edge)
+      if ('documentPictureInPicture' in window) {
+        const pipWindow = await (window as any).documentPictureInPicture.requestWindow({
+          width: 300,
+          height: 300,
+        });
+        
+        pipWindow.document.body.style.margin = '0';
+        pipWindow.document.body.style.display = 'flex';
+        pipWindow.document.body.style.flexDirection = 'column';
+        pipWindow.document.body.style.backgroundColor = '#121212';
+        pipWindow.document.body.style.color = 'white';
+        pipWindow.document.body.style.fontFamily = 'system-ui, sans-serif';
+
+        const img = document.createElement('img');
+        img.src = currentTrack?.albumUrl || '';
+        img.style.width = '100%';
+        img.style.aspectRatio = '1/1';
+        img.style.objectFit = 'cover';
+        pipWindow.document.body.appendChild(img);
+
+        const info = document.createElement('div');
+        info.style.padding = '12px';
+        info.innerHTML = `<strong style="font-size: 16px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${currentTrack?.title}</strong><span style="font-size: 14px; color: #b3b3b3;">${currentTrack?.artist}</span>`;
+        pipWindow.document.body.appendChild(info);
+        return;
+      }
+
+      // 2. Fallback to Canvas/Video hack
+      if (!pipVideoRef.current || !pipCanvasRef.current) return;
       const video = pipVideoRef.current;
       const canvas = pipCanvasRef.current;
       const stream = canvas.captureStream(30);
       video.srcObject = stream;
       await video.play();
       await video.requestPictureInPicture();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to enter PiP mode', err);
-      alert('Picture-in-Picture failed. Ensure you have interacted with the page first.');
+      alert(`PiP Error: ${err.message || 'Not supported by your browser.'}`);
     }
   };
 
