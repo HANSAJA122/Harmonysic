@@ -3,6 +3,7 @@ import React from 'react';
 import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import AddToPlaylistModal from '../UI/AddToPlaylistModal';
+import { LyricsView } from './LyricsView';
 import './FullScreenPlayer.css';
 
 const FullScreenPlayer: React.FC = () => {
@@ -39,23 +40,31 @@ const FullScreenPlayer: React.FC = () => {
           </button>
         </div>
 
-        <div className="fs-artwork-container">
-          <img src={currentTrack.albumUrl} alt={currentTrack.title} className="fs-artwork" />
-        </div>
-
-        <div className="fs-track-info">
-          <div>
-            <div className="fs-title">{currentTrack.title}</div>
-            <div className="fs-artist">{currentTrack.artist}</div>
+        {isLyricsOpen ? (
+          <div className="fs-lyrics-container">
+            <LyricsView />
           </div>
-          <button 
-            className="player-control-btn" 
-            onClick={() => toggleLikeSong(currentTrack)}
-            style={{ color: isLiked ? 'var(--color-primary)' : 'inherit' }}
-          >
-            <Heart size={28} fill={isLiked ? "currentColor" : "none"} />
-          </button>
-        </div>
+        ) : (
+          <>
+            <div className="fs-artwork-container">
+              <img src={currentTrack.albumUrl} alt={currentTrack.title} className="fs-artwork" />
+            </div>
+
+            <div className="fs-track-info">
+              <div>
+                <div className="fs-title">{currentTrack.title}</div>
+                <div className="fs-artist">{currentTrack.artist}</div>
+              </div>
+              <button 
+                className="player-control-btn" 
+                onClick={() => toggleLikeSong(currentTrack)}
+                style={{ color: isLiked ? 'var(--color-primary)' : 'inherit' }}
+              >
+                <Heart size={28} fill={isLiked ? "currentColor" : "none"} />
+              </button>
+            </div>
+          </>
+        )}
 
         <div className="fs-progress">
           <div className="fs-progress-bar">

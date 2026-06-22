@@ -5,7 +5,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { LyricsView } from '@/components/Player/LyricsView';
 
 export const MainContentWrapper: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { isLyricsOpen, theme } = usePlayerStore();
+  const { isLyricsOpen, isFullScreen, theme } = usePlayerStore();
   
   // Apply theme to document
   React.useEffect(() => {
@@ -13,7 +13,7 @@ export const MainContentWrapper: React.FC<{children: React.ReactNode}> = ({ chil
   }, [theme]);
 
   // When lyrics are open, the background matches the dynamic album art color
-  const bgStyle = isLyricsOpen 
+  const bgStyle = isLyricsOpen && !isFullScreen
     ? { background: 'linear-gradient(to bottom, var(--dynamic-theme-color-dark, var(--color-surface)), #000000)' } 
     : {};
 
@@ -30,7 +30,7 @@ export const MainContentWrapper: React.FC<{children: React.ReactNode}> = ({ chil
         ...bgStyle
       }}
     >
-      {isLyricsOpen ? (
+      {isLyricsOpen && !isFullScreen ? (
         <LyricsView />
       ) : (
         <div style={{ flex: 1, overflowY: 'auto', height: '100%' }}>
