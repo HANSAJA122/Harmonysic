@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { FastAverageColor } from 'fast-average-color';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import './MusicPlayer.css';
 
 const MusicPlayer: React.FC = () => {
@@ -20,6 +21,8 @@ const MusicPlayer: React.FC = () => {
     likedSongs, toggleLikeSong,
     isRadioMode, toggleRadioMode
   } = usePlayerStore();
+  
+  const isOnline = useNetworkStatus();
   
   const { user } = useAuthStore();
   const ytPlayerRef = useRef<any>(null);
@@ -252,6 +255,12 @@ const MusicPlayer: React.FC = () => {
 
   const handlePlayPauseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!isOnline && !isPlaying) {
+      alert("Playback is not available offline.");
+      return;
+    }
+
     togglePlayPause();
     
     if (ytPlayerRef.current && playerReady) {
