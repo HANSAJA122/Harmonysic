@@ -7,10 +7,6 @@ import './ChameleonBackground.css';
 export default function ChameleonBackground() {
   const { chameleonMode } = usePlayerStore();
 
-  if (chameleonMode === 'none') {
-    return null;
-  }
-
   // Memoize random elements so they don't jump around on re-renders
   const rainDrops = useMemo(() => {
     return Array.from({ length: 50 }).map((_, i) => ({
@@ -48,6 +44,10 @@ export default function ChameleonBackground() {
       };
     });
   }, []);
+
+  if (chameleonMode === 'none') {
+    return null;
+  }
 
   return (
     <div className={`chameleon-wrapper chameleon-${chameleonMode}`}>
