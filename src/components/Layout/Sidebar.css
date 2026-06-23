@@ -52,7 +52,12 @@
 }
 
 .sidebar-nav-item.active {
-  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  color: var(--dynamic-theme-color, var(--color-text-primary));
+}
+
+.sidebar-nav-item.active svg {
+  color: var(--dynamic-theme-color, var(--color-primary));
 }
 
 /* Library Filters */

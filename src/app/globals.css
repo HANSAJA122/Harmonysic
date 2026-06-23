@@ -4,3 +4,19 @@
 @import '../styles/reset.css';
 @import '../styles/animations.css';
 @import '../styles/utilities.css';
+
+/* Dynamic Theme Color Transitions */
+.icon-btn, .progress-filled, .volume-filled, .sidebar-link.active, .primary-btn {
+  transition: background-color 0.8s ease, color 0.8s ease, box-shadow 0.8s ease, fill 0.8s ease, border-color 0.8s ease;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at top right, var(--dynamic-theme-color-dark, transparent) 0%, transparent 40%);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: -1;
+  transition: background 1s ease;
+}

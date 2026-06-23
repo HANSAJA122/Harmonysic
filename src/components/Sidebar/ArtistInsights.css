@@ -1,0 +1,87 @@
+.artist-insights-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+}
+
+.insight-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.8s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-color: var(--dynamic-theme-color, rgba(255, 255, 255, 0.1));
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--dynamic-theme-color, var(--color-primary));
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.insight-content {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.insight-shimmer {
+  height: 60px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ticket-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: var(--dynamic-theme-color, var(--color-primary));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.3s ease, background 0.8s ease;
+  text-decoration: none;
+}
+
+.ticket-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.ticket-btn.seatgeek {
+  background: transparent;
+  border: 1px solid var(--dynamic-theme-color, var(--color-primary));
+  color: var(--dynamic-theme-color, var(--color-primary));
+}
+
+.ticket-btn.seatgeek:hover {
+  background: rgba(255, 255, 255, 0.05);
+}

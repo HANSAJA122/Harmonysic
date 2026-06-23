@@ -1,7 +1,7 @@
 :root {
-  --color-primary: #E27D60;
-  --color-primary-hover: #F5C4A8;
-  --color-secondary: #7C3F3B;
+  --color-primary: var(--dynamic-theme-color, #E27D60);
+  --color-primary-hover: var(--dynamic-theme-color-dark, #F5C4A8);
+  --color-secondary: var(--dynamic-theme-color-dark, #7C3F3B);
   --color-background: #141213;
   --color-surface: #221C1E;
   --color-surface-elevated: #2A2124;

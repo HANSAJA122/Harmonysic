@@ -7,6 +7,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
+import { ArtistInsights } from '../Sidebar/ArtistInsights';
 import './RightSidebar.css';
 
 const RightSidebar: React.FC = () => {
@@ -159,7 +160,7 @@ const RightSidebar: React.FC = () => {
           ))}
         </div>
       ) : activeTab === 'now-playing' && currentTrack ? (
-        <div className="now-playing-content">
+        <div className="now-playing-content animate-fade-in">
           <div className="right-sidebar-artwork-container">
             <img src={currentTrack.albumUrl} alt={currentTrack.title} className="right-sidebar-artwork" />
           </div>
@@ -169,16 +170,7 @@ const RightSidebar: React.FC = () => {
             <div className="right-sidebar-artist">{currentTrack.artist}</div>
           </div>
 
-          <div className="right-sidebar-card">
-            <div className="right-sidebar-card-header">
-              <span style={{ fontWeight: 700 }}>Credits</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>Show all</span>
-            </div>
-            <div className="right-sidebar-credit">
-              <span className="credit-name">{currentTrack.artist}</span>
-              <span className="credit-role">Main Artist</span>
-            </div>
-          </div>
+          <ArtistInsights artistName={currentTrack.artist} />
         </div>
       ) : activeTab === 'queue' && currentTrack ? (
         <div className="queue-content">
