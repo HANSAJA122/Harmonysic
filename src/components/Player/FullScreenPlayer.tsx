@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2 } from 'lucide-react';
+import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2, Radio } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import AddToPlaylistModal from '../UI/AddToPlaylistModal';
 import { LyricsView } from './LyricsView';
@@ -10,7 +10,8 @@ const FullScreenPlayer: React.FC = () => {
   const { 
     currentTrack, isPlaying, togglePlayPause, setFullScreen, progress, isFullScreen,
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
-    likedSongs, toggleLikeSong, isLyricsOpen, setLyricsOpen
+    likedSongs, toggleLikeSong, isLyricsOpen, setLyricsOpen,
+    isRadioMode, toggleRadioMode
   } = usePlayerStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
@@ -102,6 +103,13 @@ const FullScreenPlayer: React.FC = () => {
             style={{ color: isLyricsOpen ? 'var(--color-primary)' : 'inherit' }}
           >
             <Mic2 size={24} />
+          </button>
+          <button 
+            className="player-control-btn" 
+            onClick={toggleRadioMode}
+            style={{ color: isRadioMode ? 'var(--color-primary)' : 'inherit' }}
+          >
+            <Radio size={24} />
           </button>
           <button className="player-control-btn"><ListMusic size={24} /></button>
         </div>

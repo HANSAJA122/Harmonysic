@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-import { Play, Pause, SkipBack, SkipForward, Maximize2, Mic2, Heart } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Maximize2, Mic2, Heart, Radio } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useAuthStore } from '@/store/authStore';
 import { db } from '@/lib/firebase';
@@ -17,7 +17,8 @@ const MusicPlayer: React.FC = () => {
     setCurrentTrackDuration, setYoutubePlayer,
     isRightSidebarOpen, setRightSidebarOpen,
     isLyricsOpen, setLyricsOpen,
-    likedSongs, toggleLikeSong
+    likedSongs, toggleLikeSong,
+    isRadioMode, toggleRadioMode
   } = usePlayerStore();
   
   const { user } = useAuthStore();
@@ -372,6 +373,16 @@ const MusicPlayer: React.FC = () => {
                 </button>
 
                 <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }}></div>
+
+                <button 
+                  className="player-control-btn" 
+                  onClick={(e) => { e.stopPropagation(); toggleRadioMode(); }}
+                  style={{ color: isRadioMode ? 'var(--color-primary)' : 'inherit', position: 'relative' }}
+                  title="Infinite Radio Mode"
+                >
+                  <Radio size={18} />
+                  {isRadioMode && <div style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-primary)' }} />}
+                </button>
 
                 <button 
                   className="player-control-btn" 

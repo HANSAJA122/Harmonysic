@@ -44,6 +44,7 @@ interface PlayerState {
   currentIndex: number;
   isShuffle: boolean;
   isRepeat: boolean;
+  isRadioMode: boolean;
   likedSongs: Track[];
   savedPlaylists: any[];
   userPlaylists: any[];
@@ -67,6 +68,8 @@ interface PlayerState {
   playPrevious: () => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
+  toggleRadioMode: () => void;
+  appendRadioTracks: (tracks: Track[]) => void;
   toggleLikeSong: (track: Track) => void;
   toggleSavePlaylist: (playlist: any) => void;
   setSavedPlaylists: (playlists: any[]) => void;
@@ -102,6 +105,7 @@ export const usePlayerStore = create<PlayerState>()(
   currentIndex: -1,
   isShuffle: false,
   isRepeat: false,
+  isRadioMode: false,
   likedSongs: [],
   savedPlaylists: [],
   userPlaylists: [],
@@ -335,6 +339,14 @@ export const usePlayerStore = create<PlayerState>()(
 
   toggleShuffle: () => set((state) => ({ isShuffle: !state.isShuffle })),
   toggleRepeat: () => set((state) => ({ isRepeat: !state.isRepeat })),
+  toggleRadioMode: () => set((state) => ({ isRadioMode: !state.isRadioMode })),
+  
+  appendRadioTracks: (tracks) => set((state) => {
+    // Avoid adding duplicates if the same tracks are suggested
+    const existingIds = new Set(state.queue.map(t => t.id));
+    const uniqueNewTracks = tracks.filter(t => !existingIds.has(t.id));
+    return { queue: [...state.queue, ...uniqueNewTracks] };
+  }),
   
   toggleLikeSong: (track) => {
     const { user, openLoginModal } = useAuthStore.getState();
@@ -519,6 +531,7 @@ export const usePlayerStore = create<PlayerState>()(
     volume: state.volume,
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,
+    isRadioMode: state.isRadioMode,
     guestPlayCount: state.guestPlayCount,
     theme: state.theme,
     listeningStats: state.listeningStats
