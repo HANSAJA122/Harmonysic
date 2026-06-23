@@ -1,0 +1,107 @@
+/* Chameleon Environments CSS */
+
+.chameleon-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 1s ease-in-out;
+}
+
+/* 1. RAIN MODE */
+.chameleon-rain {
+  background: linear-gradient(to bottom, rgba(10,15,30,0.8), rgba(20,30,50,0.9));
+}
+
+.rain-drop {
+  position: absolute;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.4));
+  width: 2px;
+  height: 100px;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% { transform: translateY(-100px); }
+  100% { transform: translateY(100vh); }
+}
+
+/* 2. SYNTHWAVE MODE */
+.chameleon-synthwave {
+  background: linear-gradient(to bottom, #110022 0%, #2b0055 50%, #000 50%, #000 100%);
+  perspective: 1000px;
+}
+
+.synth-sun {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #ff007f 0%, #ff7f00 100%);
+  box-shadow: 0 0 50px #ff007f;
+}
+
+.synth-grid {
+  position: absolute;
+  bottom: 0;
+  left: -50%;
+  width: 200%;
+  height: 50%;
+  background-image: 
+    linear-gradient(rgba(255,0,127,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,0,127,0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: rotateX(80deg);
+  transform-origin: top center;
+  animation: gridMove 2s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 40px; }
+}
+
+/* 3. PARTICLES MODE */
+.chameleon-particles {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: float linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+
+/* 4. LAVA MODE */
+.chameleon-lava {
+  background: #000;
+  filter: blur(40px) contrast(1.5);
+}
+
+.lava-blob {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  animation: morph infinite ease-in-out alternate;
+}
+
+@keyframes morph {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, -50px) scale(1.5); }
+}

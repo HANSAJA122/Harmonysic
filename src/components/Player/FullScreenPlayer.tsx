@@ -1,9 +1,10 @@
 "use client";
 import React from 'react';
-import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2, Radio } from 'lucide-react';
+import { ChevronDown, MoreHorizontal, Heart, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, MonitorSpeaker, ListMusic, Mic2, Radio, Wand2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import AddToPlaylistModal from '../UI/AddToPlaylistModal';
 import { LyricsView } from './LyricsView';
+import ChameleonBackground from './ChameleonBackground';
 import './FullScreenPlayer.css';
 
 const FullScreenPlayer: React.FC = () => {
@@ -11,7 +12,7 @@ const FullScreenPlayer: React.FC = () => {
     currentTrack, isPlaying, togglePlayPause, setFullScreen, progress, isFullScreen,
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
     likedSongs, toggleLikeSong, isLyricsOpen, setLyricsOpen,
-    isRadioMode, toggleRadioMode
+    isRadioMode, toggleRadioMode, chameleonMode, cycleChameleonMode
   } = usePlayerStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
@@ -29,16 +30,31 @@ const FullScreenPlayer: React.FC = () => {
   const progressPercent = currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0;
 
   return (
-    <div className="fullscreen-player animate-slide-up">
+    <div className={`fullscreen-player ${isFullScreen ? 'open' : ''}`}>
+      <ChameleonBackground />
+      
+      {/* Dynamic Background Image Layer */}
+      {currentTrack.albumUrl && chameleonMode === 'none' && (
+        <div 
+          className="fs-bg-image" 
+          style={{ backgroundImage: `url(${currentTrack.albumUrl})` }} 
+        />
+      )}
+
       <div className="fs-content-wrapper">
         <div className="fs-header">
-          <button onClick={() => setFullScreen(false)} className="player-control-btn">
-            <ChevronDown size={32} color="var(--color-text-primary)" />
+          <button className="player-control-btn" onClick={() => setFullScreen(false)}>
+            <ChevronDown size={32} />
           </button>
           <div className="fs-header-title">Now Playing</div>
-          <button className="player-control-btn" onClick={() => setIsAddModalOpen(true)}>
-            <MoreHorizontal size={28} />
-          </button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button className="player-control-btn" onClick={cycleChameleonMode} title="Toggle Chameleon Mode" style={{ color: chameleonMode !== 'none' ? 'var(--color-primary)' : 'inherit' }}>
+              <Wand2 size={24} />
+            </button>
+            <button className="player-control-btn" onClick={() => setIsAddModalOpen(true)}>
+              <MoreHorizontal size={24} />
+            </button>
+          </div>
         </div>
 
         {isLyricsOpen ? (

@@ -45,6 +45,7 @@ interface PlayerState {
   isShuffle: boolean;
   isRepeat: boolean;
   isRadioMode: boolean;
+  chameleonMode: 'none' | 'rain' | 'synthwave' | 'particles' | 'lava';
   likedSongs: Track[];
   savedPlaylists: any[];
   userPlaylists: any[];
@@ -69,6 +70,7 @@ interface PlayerState {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   toggleRadioMode: () => void;
+  cycleChameleonMode: () => void;
   appendRadioTracks: (tracks: Track[]) => void;
   toggleLikeSong: (track: Track) => void;
   toggleSavePlaylist: (playlist: any) => void;
@@ -106,6 +108,7 @@ export const usePlayerStore = create<PlayerState>()(
   isShuffle: false,
   isRepeat: false,
   isRadioMode: false,
+  chameleonMode: 'none',
   likedSongs: [],
   savedPlaylists: [],
   userPlaylists: [],
@@ -341,6 +344,13 @@ export const usePlayerStore = create<PlayerState>()(
   toggleRepeat: () => set((state) => ({ isRepeat: !state.isRepeat })),
   toggleRadioMode: () => set((state) => ({ isRadioMode: !state.isRadioMode })),
   
+  cycleChameleonMode: () => set((state) => {
+    const modes: ('none' | 'rain' | 'synthwave' | 'particles' | 'lava')[] = ['none', 'rain', 'synthwave', 'particles', 'lava'];
+    const currentIndex = modes.indexOf(state.chameleonMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    return { chameleonMode: modes[nextIndex] };
+  }),
+  
   appendRadioTracks: (tracks) => set((state) => {
     // Avoid adding duplicates if the same tracks are suggested
     const existingIds = new Set(state.queue.map(t => t.id));
@@ -532,6 +542,7 @@ export const usePlayerStore = create<PlayerState>()(
     isShuffle: state.isShuffle,
     isRepeat: state.isRepeat,
     isRadioMode: state.isRadioMode,
+    chameleonMode: state.chameleonMode,
     guestPlayCount: state.guestPlayCount,
     theme: state.theme,
     listeningStats: state.listeningStats
