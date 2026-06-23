@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import PlayerStateProvider from '@/components/Player/PlayerStateProvider';
-import OfflineBanner from '@/components/UI/OfflineBanner';
 
 export const metadata: Metadata = {
   title: 'Harmonysic',
@@ -34,7 +33,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <PlayerStateProvider>
-          <OfflineBanner />
           {children}
         </PlayerStateProvider>
       </body>

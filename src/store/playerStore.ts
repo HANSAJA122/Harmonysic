@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
-import * as idb from 'idb-keyval';
+import { persist } from 'zustand/middleware';
 import { useAuthStore } from './authStore';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -538,9 +537,6 @@ export const usePlayerStore = create<PlayerState>()(
 {
   name: 'harmonysic-storage',
   partialize: (state) => ({ 
-    currentTrack: state.currentTrack,
-    queue: state.queue,
-    progress: state.progress,
     savedPlaylists: state.savedPlaylists,
     volume: state.volume,
     isShuffle: state.isShuffle,
@@ -551,16 +547,5 @@ export const usePlayerStore = create<PlayerState>()(
     theme: state.theme,
     listeningStats: state.listeningStats
   }),
-  storage: createJSONStorage(() => ({
-    getItem: async (name: string): Promise<string | null> => {
-      return (await idb.get(name)) || null;
-    },
-    setItem: async (name: string, value: string): Promise<void> => {
-      await idb.set(name, value);
-    },
-    removeItem: async (name: string): Promise<void> => {
-      await idb.del(name);
-    },
-  })),
 }
 ));

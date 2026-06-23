@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search as SearchIcon, X, Play } from 'lucide-react';
-import { SkeletonTrack } from '@/components/UI/Skeleton';
 import { MediaCard } from '@/components/UI/MediaCard';
 import { SongCard } from '@/components/UI/SongCard';
 import { usePlayerStore, Track } from '@/store/playerStore';
@@ -80,20 +79,8 @@ function SearchContent() {
         )}
 
         {loading && (
-          <div className="search-results">
-            <div className="search-top-section">
-              <div className="search-top-artist">
-                <div style={{ height: 250, width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: 8 }} className="skeleton-pulse"></div>
-              </div>
-              <div className="search-top-songs">
-                <div className="search-songs-list">
-                  <SkeletonTrack />
-                  <SkeletonTrack />
-                  <SkeletonTrack />
-                  <SkeletonTrack />
-                </div>
-              </div>
-            </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
           </div>
         )}
 
