@@ -12,7 +12,8 @@ const FullScreenPlayer: React.FC = () => {
     currentTrack, isPlaying, togglePlayPause, setFullScreen, progress, isFullScreen,
     playNext, playPrevious, isShuffle, isRepeat, toggleShuffle, toggleRepeat,
     likedSongs, toggleLikeSong, isLyricsOpen, setLyricsOpen,
-    isRadioMode, toggleRadioMode, chameleonMode, cycleChameleonMode
+    isRadioMode, toggleRadioMode, chameleonMode, cycleChameleonMode,
+    youtubePlayer, setProgress
   } = usePlayerStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
@@ -28,6 +29,15 @@ const FullScreenPlayer: React.FC = () => {
   };
 
   const progressPercent = currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0;
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const newTime = Number(e.target.value);
+    if (youtubePlayer) {
+      youtubePlayer.seekTo(newTime, true);
+      setProgress(newTime);
+    }
+  };
 
   return (
     <div className={`fullscreen-player ${isFullScreen ? 'open' : ''}`}>
@@ -84,9 +94,15 @@ const FullScreenPlayer: React.FC = () => {
         )}
 
         <div className="fs-progress">
-          <div className="fs-progress-bar">
-            <div className="fs-progress-fill" style={{ width: `${progressPercent}%` }}></div>
-          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max={currentTrack.duration || 100} 
+            value={progress} 
+            onChange={handleSeek}
+            className="fs-seek-bar"
+            style={{ background: `linear-gradient(to right, var(--color-text-primary) ${progressPercent}%, rgba(255,255,255,0.1) ${progressPercent}%)` }}
+          />
           <div className="fs-time-labels">
             <span>{formatTime(progress)}</span>
             <span>{formatTime(currentTrack.duration)}</span>
